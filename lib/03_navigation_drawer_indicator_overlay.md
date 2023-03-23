@@ -1,8 +1,92 @@
-// NOTE:
-//
-// Copy the code for the issue sample to test here. It always only contains
-// the sample last looked at.
+## NavigationDrawer indicator overlay does not use shape
 
+If the `NavigationDrawer` shape is modified via `indicatorShape` by widget or theme, from its default M3 `StadiumBorder` shape, the indicator correctly gets the new shape, but `InkWell` used by overlay color for focus, hover and pressed state does not use the specified shape.
+
+## Expected results
+
+We define the `indicatorShape` to be:
+
+```dart
+  indicatorShape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(
+      Radius.circular(12),
+    ),
+  ),
+```
+
+We expect the selected indicator and its hover, focus and pressed shapes to have border radius 12 dp.
+
+| Used in Drawer | Used on main canvas |
+|----------------|---------------------|
+| ![Screenshot 2023-03-23 at 12 23 38](https://user-images.githubusercontent.com/39990307/227186332-2f85f32a-cb25-4bbb-8682-2710c6f4710a.png) | ![Screenshot 2023-03-23 at 12 23 23](https://user-images.githubusercontent.com/39990307/227186367-7df4c5ef-9135-4db8-8156-696f83b930a9.png) |
+
+## Actual results
+
+We get an indicator where selected shape is 12 dp, but hover, focused and pressed are still using the M3 default stadium border shape.
+
+| Used in Drawer | Used on main canvas |
+|----------------|---------------------|
+| ![Screenshot 2023-03-23 at 12 03 19](https://user-images.githubusercontent.com/39990307/227186716-7ab26f68-5c40-44dd-b592-17d248a8b46a.png) | ![Screenshot 2023-03-23 at 12 02 59](https://user-images.githubusercontent.com/39990307/227186745-80cbc0df-5df3-4357-afcb-7bdf6046f098.png) |
+
+## Proposed fix
+
+The issue is caused by the `_NavigationDestinationBuilder` having a hard coded border radius on its `InkWell` and not applying typical `widget ?? theme ?? default` fall-through to its shape, the bug is here:
+
+https://github.com/flutter/flutter/blob/250a6c294264d3e8b39b5580737f2ed959d1de5a/packages/flutter/lib/src/material/navigation_drawer.dart#L331
+
+The bug can be fixed by changing the `InkWell` to instead of using `borderRadius`, to use its `customBorder` shape property and as the shape use the same one already available for the selected indicator.
+
+The fixed version of the `_NavigationDestinationBuilder` becomes:
+
+```dart
+return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: _NavigationDestinationSemantics(
+        child: SizedBox(
+          height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
+          child: InkWell(
+            highlightColor: Colors.transparent,
+            onTap: info.onTap,
+            // Remove hard coded wrong InkWell shape.
+            // >> borderRadius: const BorderRadius.all(Radius.circular(28.0)),
+            // Add fixed version, using widget ?? theme ?? M3 default for the shape.
+            customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                NavigationIndicator(
+                  animation: info.selectedAnimation,
+                  color: info.indicatorColor ?? navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor!,
+                  shape: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
+                  width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
+                  height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
+                ),
+                Row(
+                  children: <Widget>[
+                    const SizedBox(width: 16),
+                    buildIcon(context),
+                    const SizedBox(width: 12),
+                    buildLabel(context),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+```
+
+Which was used to produce the expected result screenshots above.
+
+**Action:** Submitting FIX PR
+
+## Issue sample code
+
+<details>
+<summary>Code sample</summary>
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -166,8 +250,8 @@ class DrawerDesktopWrapper extends StatelessWidget {
           removeLeft: true,
           removeRight: true,
           child: const SizedBox(
-              height: 280,
-              child: NavigationDrawerShowcase(),
+            height: 280,
+            child: NavigationDrawerShowcase(),
           ),
         ),
       ],
@@ -506,3 +590,68 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+</details>
+
+## Used Flutter version
+
+Channel master, 3.9.0-15.0.pre.21
+
+<details>
+  <summary>Flutter doctor</summary>
+
+```
+flutter doctor -v  
+[✓] Flutter (Channel master, 3.9.0-15.0.pre.21, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.9.0-15.0.pre.21 on channel master at /Users/rydmike/fvm/versions/master
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision ae14df98ba (3 hours ago), 2023-03-23 03:18:18 -0400
+    • Engine revision 9e25f2f6ea
+    • Dart version 3.0.0 (build 3.0.0-358.0.dev)
+    • DevTools version 2.22.2
+    • If those were intentional, you can disregard the above warnings; however it is recommended
+      to use "git" directly to perform update checks and upgrades.
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.2)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14C18
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+
+[✓] IntelliJ IDEA Community Edition (version 2022.3.3)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 72.1.4
+    • Dart plugin version 223.8888
+
+[✓] VS Code (version 1.76.2)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.60.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.2.1 22D68 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 111.0.5563.110
+
+[✓] Network resources
+    • All expected network resources are available.
+
+```
+
+</details>

@@ -1,8 +1,3 @@
-// NOTE:
-//
-// Copy the code for the issue sample to test here. It always only contains
-// the sample last looked at.
-
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -166,8 +161,8 @@ class DrawerDesktopWrapper extends StatelessWidget {
           removeLeft: true,
           removeRight: true,
           child: const SizedBox(
-              height: 280,
-              child: NavigationDrawerShowcase(),
+            height: 280,
+            child: NavigationDrawerShowcase(),
           ),
         ),
       ],
