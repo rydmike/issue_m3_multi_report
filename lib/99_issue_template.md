@@ -23,7 +23,7 @@ Actual results
 ## Proposal
 
 
-## Issue demo code
+## Issue sample code
 
 <details>
 <summary>Code sample</summary>
@@ -35,7 +35,7 @@ Actual results
 
 </details>
 
-## Used Flutter Version
+## Used Flutter version
 
 Channel master, 3.7.0-15.0.pre.16
 

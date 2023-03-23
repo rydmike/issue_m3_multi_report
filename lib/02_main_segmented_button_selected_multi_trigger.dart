@@ -1,8 +1,3 @@
-// NOTE:
-//
-// Copy the code for the issue sample to test here. It always only contains
-// the sample last looked at.
-
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -177,8 +172,8 @@ class HomePage extends StatelessWidget {
         const Text(
           'ISSUE: SegmentedButton selected overlay incorrect due '
               'to widget setting wrong MaterialState.'
-          '\n\n'
-          'EXPECT: SegmentedButton selected state overlayColor to work.',
+              '\n\n'
+              'EXPECT: SegmentedButton selected state overlayColor to work.',
         ),
         const SizedBox(height: 16),
         const Padding(
