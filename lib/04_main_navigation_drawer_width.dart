@@ -21,8 +21,6 @@
 // SOFTWARE.
 import 'package:flutter/material.dart';
 
-// This issue reported here: https://github.com/flutter/flutter/issues/123308
-
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
 // Make M3 ColorSchemes from a seed color.
@@ -37,63 +35,10 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 
 // Example theme
 ThemeData demoTheme(Brightness mode, bool useMaterial3) {
-  ColorScheme colorScheme = mode == Brightness.light ? schemeLight : schemeDark;
   return ThemeData(
     colorScheme: mode == Brightness.light ? schemeLight : schemeDark,
     useMaterial3: useMaterial3,
     visualDensity: VisualDensity.standard,
-    segmentedButtonTheme: SegmentedButtonThemeData(
-      style: ButtonStyle(
-        // SegmentedButton triggers overlay 3 times in Selected mode, 1st
-        // time it is selected, next time it is no longer selected,
-        // even it if actually is. This results is that we never see the
-        // selected overlay state. It is also triggered 3 times when not
-        // selected, but there we get the unselected mode all times, so
-        // it is not noticed, still one call would be enough.
-        overlayColor:
-        MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-
-          if (states.contains(MaterialState.selected)) {
-            // This CUSTOM overlay for selected overlay never gets seen due
-            // to this issue. The debug print are inserted to show when
-            // the state is being called.
-            if (states.contains(MaterialState.hovered)) {
-              debugPrint('Overlay: MaterialState.selected+hovered called');
-              return colorScheme.error.withOpacity(0.24);
-            }
-            if (states.contains(MaterialState.focused)) {
-              debugPrint('Overlay: MaterialState.selected+focused called');
-              return colorScheme.error.withOpacity(0.24);
-            }
-            // The pressed state is actually seen, but it is mixed with
-            // unselected pressed state.
-            if (states.contains(MaterialState.pressed)) {
-              debugPrint('Overlay: MaterialState.selected+pressed called');
-              return colorScheme.error.withOpacity(0.48);
-            }
-          }
-          else {
-            if (states.contains(MaterialState.hovered)) {
-              debugPrint('Overlay: MaterialState.hovered called');
-              return colorScheme.onSurface.withOpacity(0.08);
-            }
-            if (states.contains(MaterialState.focused)) {
-              debugPrint('Overlay: MaterialState.focused called');
-              return colorScheme.onSurface.withOpacity(0.12);
-            }
-            if (states.contains(MaterialState.pressed)) {
-              debugPrint('Overlay: MaterialState.pressed called');
-              return colorScheme.onSurface.withOpacity(0.12);
-            }
-          }
-          // This never gets called. Falling back to MaterialState is thus
-          // handled by widget defaults and never reaches this branch,
-          // even when it should.
-          debugPrint('Overlay: MaterialState no MaterialState called');
-          return null;
-        }),
-      ),
-    ),
   );
 }
 
@@ -120,8 +65,9 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
       theme: demoTheme(Brightness.light, useMaterial3),
       darkTheme: demoTheme(Brightness.dark, useMaterial3),
       home: Scaffold(
+        drawer: const NavigationDrawerShowcase(),
         appBar: AppBar(
-          title: const Text('SegmentedButton M3 MaterialState Issue'),
+          title: const Text('NavigationDrawer Width'),
           actions: [
             IconButton(
               icon: useMaterial3
@@ -167,20 +113,20 @@ class HomePage extends StatelessWidget {
       children: [
         const SizedBox(height: 8),
         Text(
-          'SegmentedButton Wrong MaterialState',
+          'NavigationDrawer has wrong width in M3',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 16),
         const Text(
-          'ISSUE: SegmentedButton selected overlay incorrect due '
-              'to widget setting wrong MaterialState.'
-              '\n\n'
-              'EXPECT: SegmentedButton selected state overlayColor to work.',
+          'ISSUE: NavigationDrawer has wrong width in M3 mode.\n'
+              '\n'
+              'EXPECT: NavigationDrawer width to match M3 spec in M3 mode '
+              'and be 360dp, it is 304dp and using the M2 spec.',
         ),
         const SizedBox(height: 16),
         const Padding(
           padding: EdgeInsets.all(32.0),
-          child: SegmentedButtonShowcase(),
+          child: DrawerDesktopWrapper(),
         ),
         const SizedBox(height: 16),
         const ShowColorSchemeColors(),
@@ -189,117 +135,95 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class SegmentedButtonShowcase extends StatefulWidget {
-  const SegmentedButtonShowcase({this.showOutlinedButton, super.key});
-  final bool? showOutlinedButton;
-
-  @override
-  State<SegmentedButtonShowcase> createState() =>
-      _SegmentedButtonShowcaseState();
-}
-
-enum Calendar { day, week, month, year }
-
-class _SegmentedButtonShowcaseState extends State<SegmentedButtonShowcase> {
-  List<bool> selected = <bool>[true, false, false];
-  Calendar _selected = Calendar.day;
+class DrawerDesktopWrapper extends StatelessWidget {
+  const DrawerDesktopWrapper({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        MediaQuery.removePadding(
+          context: context,
+          removeBottom: true,
+          removeTop: true,
+          removeLeft: true,
+          removeRight: true,
+          child: const SizedBox(
+            height: 320,
+            child: NavigationDrawerShowcase(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class NavigationDrawerShowcase extends StatefulWidget {
+  const NavigationDrawerShowcase({
+    super.key,
+  });
+
+  @override
+  State<NavigationDrawerShowcase> createState() =>
+      _NavigationDrawerShowcaseState();
+}
+
+class _NavigationDrawerShowcaseState extends State<NavigationDrawerShowcase> {
+  int selectedIndex = 0;
+  late final GlobalKey _key = GlobalKey();
+  RenderBox? renderBox;
+
+  _afterLayout(_) {
+    setState(() {
+      if (_key.currentContext?.findRenderObject() != null) {
+        renderBox = _key.currentContext!.findRenderObject() as RenderBox;
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double width = renderBox?.size.width ?? 0;
+    return NavigationDrawer(
+      key: _key,
+      selectedIndex: selectedIndex,
+      onDestinationSelected: (int value) {
+        setState(() {
+          selectedIndex = value;
+        });
+      },
       children: <Widget>[
-        SegmentedButton<Calendar>(
-          showSelectedIcon: false,
-          segments: const <ButtonSegment<Calendar>>[
-            ButtonSegment<Calendar>(
-              value: Calendar.day,
-              label: Text('Day'),
-            ),
-            ButtonSegment<Calendar>(
-              value: Calendar.week,
-              label: Text('Week'),
-            ),
-            ButtonSegment<Calendar>(
-              value: Calendar.month,
-              label: Text('Month'),
-            ),
-            ButtonSegment<Calendar>(
-              value: Calendar.year,
-              label: Text('Year'),
-            ),
-          ],
-          selected: <Calendar>{_selected},
-          onSelectionChanged: (Set<Calendar> selected) {
-            setState(() {
-              _selected = selected.first;
-            });
-          },
+        const SizedBox(height: 16),
+        const NavigationDrawerDestination(
+          icon: Badge(
+            label: Text('26'),
+            child: Icon(Icons.chat_bubble),
+          ),
+          label: Text('Chat'),
         ),
-        SegmentedButton<Calendar>(
-          segments: const <ButtonSegment<Calendar>>[
-            ButtonSegment<Calendar>(
-              value: Calendar.day,
-              label: Text('Day'),
-              icon: Icon(Icons.calendar_view_day),
-            ),
-            ButtonSegment<Calendar>(
-              value: Calendar.week,
-              icon: Icon(Icons.calendar_view_week),
-              label: Text('Week'),
-            ),
-            ButtonSegment<Calendar>(
-              value: Calendar.month,
-              icon: Icon(Icons.calendar_view_month),
-              label: Text('Month'),
-            ),
-            ButtonSegment<Calendar>(
-              value: Calendar.year,
-              icon: Icon(Icons.calendar_today),
-              label: Text('Year'),
-            ),
-          ],
-          selected: <Calendar>{_selected},
-          onSelectionChanged: (Set<Calendar> selected) {
-            setState(() {
-              _selected = selected.first;
-            });
-          },
+        const NavigationDrawerDestination(
+          icon: Icon(Icons.beenhere),
+          label: Text('Tasks'),
         ),
-        SegmentedButton<Calendar>(
-          segments: const <ButtonSegment<Calendar>>[
-            ButtonSegment<Calendar>(
-              value: Calendar.day,
-              label: Text('Day'),
-              icon: Icon(Icons.calendar_view_day),
-              enabled: false,
-            ),
-            ButtonSegment<Calendar>(
-              value: Calendar.week,
-              icon: Icon(Icons.calendar_view_week),
-              label: Text('Week'),
-            ),
-            ButtonSegment<Calendar>(
-              value: Calendar.month,
-              icon: Icon(Icons.calendar_view_month),
-              label: Text('Month'),
-              enabled: false,
-            ),
-            ButtonSegment<Calendar>(
-              value: Calendar.year,
-              icon: Icon(Icons.calendar_today),
-              label: Text('Year'),
-            ),
-          ],
-          selected: <Calendar>{_selected},
-          onSelectionChanged: (Set<Calendar> selected) {
-            setState(() {
-              _selected = selected.first;
-            });
-          },
+        const Divider(),
+        const NavigationDrawerDestination(
+          icon: Icon(Icons.create_new_folder),
+          label: Text('Folder'),
         ),
+        const NavigationDrawerDestination(
+          icon: Icon(Icons.logout),
+          label: Text('Logout'),
+        ),
+        const SizedBox(height: 16),
+        Text('Drawer is $width dp wide', textAlign: TextAlign.center),
       ],
     );
   }

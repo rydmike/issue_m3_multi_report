@@ -26,6 +26,8 @@
 // SOFTWARE.
 import 'package:flutter/material.dart';
 
+// Related posted issue: https://github.com/flutter/flutter/issues/123380
+
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
 // Make M3 ColorSchemes from a seed color.
@@ -44,13 +46,6 @@ ThemeData demoTheme(Brightness mode, bool useMaterial3) {
     colorScheme: mode == Brightness.light ? schemeLight : schemeDark,
     useMaterial3: useMaterial3,
     visualDensity: VisualDensity.standard,
-    navigationDrawerTheme: const NavigationDrawerThemeData(
-      indicatorShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(12),
-        ),
-      ),
-    ),
   );
 }
 
@@ -79,7 +74,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
       home: Scaffold(
         drawer: const NavigationDrawerShowcase(),
         appBar: AppBar(
-          title: const Text('NavigationDrawer Indicator Shape'),
+          title: const Text('NavigationDrawer Width'),
           actions: [
             IconButton(
               icon: useMaterial3
@@ -125,17 +120,15 @@ class HomePage extends StatelessWidget {
       children: [
         const SizedBox(height: 8),
         Text(
-          'NavigationDrawer Indicator Overlay Shape',
+          'NavigationDrawer has wrong width in M3',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 16),
         const Text(
-          'ISSUE: NavigationDrawer indicator overlay shape does not change '
-              'when you modify the indicator shape'
-              '\n\n'
-              'EXPECT: NavigationDrawer indicator shape overlay to use '
-              'defined indicator shape with border radius 12, like the '
-              'indicator does, but overlay remains stadium shaped.',
+          'ISSUE: NavigationDrawer has wrong width in M3 mode.\n'
+          '\n'
+          'EXPECT: NavigationDrawer width to match M3 spec in M3 mode '
+          'and be 360dp, it is 304dp and using the M2 spec.',
         ),
         const SizedBox(height: 16),
         const Padding(
@@ -148,7 +141,6 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
 
 class DrawerDesktopWrapper extends StatelessWidget {
   const DrawerDesktopWrapper({Key? key}) : super(key: key);
@@ -166,15 +158,14 @@ class DrawerDesktopWrapper extends StatelessWidget {
           removeLeft: true,
           removeRight: true,
           child: const SizedBox(
-              height: 280,
-              child: NavigationDrawerShowcase(),
+            height: 320,
+            child: NavigationDrawerShowcase(),
           ),
         ),
       ],
     );
   }
 }
-
 
 class NavigationDrawerShowcase extends StatefulWidget {
   const NavigationDrawerShowcase({
@@ -188,38 +179,58 @@ class NavigationDrawerShowcase extends StatefulWidget {
 
 class _NavigationDrawerShowcaseState extends State<NavigationDrawerShowcase> {
   int selectedIndex = 0;
+  late final GlobalKey _key = GlobalKey();
+  RenderBox? renderBox;
+
+  _afterLayout(_) {
+    setState(() {
+      if (_key.currentContext?.findRenderObject() != null) {
+        renderBox = _key.currentContext!.findRenderObject() as RenderBox;
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final double width = renderBox?.size.width ?? 0;
     return NavigationDrawer(
+      key: _key,
       selectedIndex: selectedIndex,
       onDestinationSelected: (int value) {
         setState(() {
           selectedIndex = value;
         });
       },
-      children: const <Widget>[
-        SizedBox(height: 16),
-        NavigationDrawerDestination(
+      children: <Widget>[
+        const SizedBox(height: 16),
+        const NavigationDrawerDestination(
           icon: Badge(
             label: Text('26'),
             child: Icon(Icons.chat_bubble),
           ),
           label: Text('Chat'),
         ),
-        NavigationDrawerDestination(
+        const NavigationDrawerDestination(
           icon: Icon(Icons.beenhere),
           label: Text('Tasks'),
         ),
-        Divider(),
-        NavigationDrawerDestination(
+        const Divider(),
+        const NavigationDrawerDestination(
           icon: Icon(Icons.create_new_folder),
           label: Text('Folder'),
         ),
-        NavigationDrawerDestination(
+        const NavigationDrawerDestination(
           icon: Icon(Icons.logout),
           label: Text('Logout'),
         ),
+        const SizedBox(height: 16),
+        Text('Drawer is $width dp wide', textAlign: TextAlign.center),
       ],
     );
   }

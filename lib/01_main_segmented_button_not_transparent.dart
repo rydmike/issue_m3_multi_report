@@ -21,6 +21,9 @@
 // SOFTWARE.
 import 'package:flutter/material.dart';
 
+// This issue reported here: https://github.com/flutter/flutter/issues/123292
+// With FIX PR: https://github.com/flutter/flutter/pull/123293
+
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
 
