@@ -19,9 +19,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// This issue reported here: https://github.com/flutter/flutter/issues/123380
+// This issue reported here: https://github.com/flutter/flutter/issues/123507
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
@@ -36,11 +37,18 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 );
 
 // Example theme
-ThemeData demoTheme(Brightness mode, bool useMaterial3) {
+ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   return ThemeData(
-    colorScheme: mode == Brightness.light ? schemeLight : schemeDark,
-    useMaterial3: useMaterial3,
+    colorScheme: mode == ThemeMode.light ? schemeLight : schemeDark,
+    useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
+    navigationDrawerTheme: NavigationDrawerThemeData(
+      indicatorSize: settings.useIndicatorWidth ? const Size(150, 56) : null,
+      tileHeight: settings.useTileHeight ? 70 : null,
+    ),
+    drawerTheme: DrawerThemeData(
+      width: settings.useDrawerWidth ? 250 : null,
+    ),
   );
 }
 
@@ -56,57 +64,101 @@ class IssueDemoApp extends StatefulWidget {
 }
 
 class _IssueDemoAppState extends State<IssueDemoApp> {
-  bool useMaterial3 = true;
   ThemeMode themeMode = ThemeMode.light;
+  bool longLabel = false;
+  TextDirection textDirection = TextDirection.ltr;
+  ThemeSettings settings = const ThemeSettings(
+    useMaterial3: true,
+    useDrawerWidth: false,
+    useIndicatorWidth: false,
+    useTileHeight: false,
+  );
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
-      theme: demoTheme(Brightness.light, useMaterial3),
-      darkTheme: demoTheme(Brightness.dark, useMaterial3),
-      home: Scaffold(
-        drawer: const NavigationDrawerShowcase(),
-        appBar: AppBar(
-          title: const Text('NavigationDrawer Width'),
-          actions: [
-            IconButton(
-              icon: useMaterial3
-                  ? const Icon(Icons.filter_3)
-                  : const Icon(Icons.filter_2),
-              onPressed: () {
-                setState(() {
-                  useMaterial3 = !useMaterial3;
-                });
-              },
-              tooltip: "Switch to Material ${useMaterial3 ? 2 : 3}",
-            ),
-            IconButton(
-              icon: themeMode == ThemeMode.dark
-                  ? const Icon(Icons.wb_sunny_outlined)
-                  : const Icon(Icons.wb_sunny),
-              onPressed: () {
-                setState(() {
-                  if (themeMode == ThemeMode.light) {
-                    themeMode = ThemeMode.dark;
-                  } else {
-                    themeMode = ThemeMode.light;
-                  }
-                });
-              },
-              tooltip: "Toggle brightness",
-            ),
-          ],
+      theme: theme(ThemeMode.light, settings),
+      darkTheme: theme(ThemeMode.dark, settings),
+      home: Directionality(
+        textDirection: textDirection,
+        child: Scaffold(
+          drawer: NavigationDrawerShowcase(longLabel: longLabel),
+          appBar: AppBar(
+            title: const Text('NavigationDrawer Umbrella Issues'),
+            actions: [
+              IconButton(
+                icon: settings.useMaterial3
+                    ? const Icon(Icons.filter_3)
+                    : const Icon(Icons.filter_2),
+                onPressed: () {
+                  setState(() {
+                    settings =
+                        settings.copyWith(useMaterial3: !settings.useMaterial3);
+                  });
+                },
+                tooltip: "Switch to Material ${settings.useMaterial3 ? 2 : 3}",
+              ),
+              IconButton(
+                icon: themeMode == ThemeMode.dark
+                    ? const Icon(Icons.wb_sunny_outlined)
+                    : const Icon(Icons.wb_sunny),
+                onPressed: () {
+                  setState(() {
+                    if (themeMode == ThemeMode.light) {
+                      themeMode = ThemeMode.dark;
+                    } else {
+                      themeMode = ThemeMode.light;
+                    }
+                  });
+                },
+                tooltip: "Toggle brightness",
+              ),
+            ],
+          ),
+          body: HomePage(
+            settings: settings,
+            onSettings: (ThemeSettings value) {
+              setState(() {
+                settings = value;
+              });
+            },
+            longLabel: longLabel,
+            onLongLabel: (bool value) {
+              setState(() {
+                longLabel = value;
+              });
+            },
+            textDirection: textDirection,
+            onTextDirection: (TextDirection value) {
+              setState(() {
+                textDirection = value;
+              });
+            },
+          ),
         ),
-        body: const HomePage(),
       ),
     );
   }
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({
+    super.key,
+    required this.settings,
+    required this.onSettings,
+    required this.longLabel,
+    required this.onLongLabel,
+    required this.textDirection,
+    required this.onTextDirection,
+  });
+  final ThemeSettings settings;
+  final ValueChanged<ThemeSettings> onSettings;
+  final bool longLabel;
+  final ValueChanged<bool> onLongLabel;
+  final TextDirection textDirection;
+  final ValueChanged<TextDirection> onTextDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -114,21 +166,59 @@ class HomePage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children: [
         const SizedBox(height: 8),
-        Text(
-          'NavigationDrawer has wrong width in M3',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 16),
         const Text(
-          'ISSUE: NavigationDrawer has wrong width in M3 mode.\n'
-          '\n'
-          'EXPECT: NavigationDrawer width to match M3 spec in M3 mode '
-          'and be 360dp, it is 304dp and using the M2 spec.',
+          '    1) Indicator is centered when sized.\n'
+          '    2) Ink size does not follow indicator size.\n'
+          '    3) Ink effects do not follow M3 spec.\n'
+          '    4) Ink effect colors cannot be changed.\n'
+          '    5) Drawer size change animation overflows\n'
+          '    6) Label is not truncated to fit',
         ),
-        const SizedBox(height: 16),
-        const Padding(
-          padding: EdgeInsets.all(32.0),
-          child: DrawerDesktopWrapper(),
+        SwitchListTile(
+          title: const Text('Custom indicator width'),
+          subtitle: const Text('ON: 150dp, OFF: default (null)'),
+          value: settings.useIndicatorWidth,
+          onChanged: (bool value) {
+            onSettings(settings.copyWith(useIndicatorWidth: value));
+          },
+        ),
+        SwitchListTile(
+          title: const Text('Custom Drawer width'),
+          subtitle: const Text('ON: 250dp, OFF: default (null)'),
+          value: settings.useDrawerWidth,
+          onChanged: (bool value) {
+            onSettings(settings.copyWith(useDrawerWidth: value));
+          },
+        ),
+        SwitchListTile(
+          title: const Text('Use custom tile height'),
+          subtitle: const Text('ON: 70dp, OFF: default (null)'),
+          value: settings.useTileHeight,
+          onChanged: (bool value) {
+            onSettings(settings.copyWith(useTileHeight: value));
+          },
+        ),
+        SwitchListTile(
+          title: const Text('Use a long Folder label'),
+          value: longLabel,
+          onChanged: (bool value) {
+            onLongLabel(value);
+          },
+        ),
+        SwitchListTile(
+          title: const Text('Text directionality'),
+          subtitle: const Text('OFF=LTR, ON=RTL Used later to test menu '
+              'indicator works correctly in both modes.'),
+          value: textDirection == TextDirection.rtl,
+          onChanged: (bool value) {
+            value
+                ? onTextDirection(TextDirection.rtl)
+                : onTextDirection(TextDirection.ltr);
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: DrawerDesktopWrapper(longLabel: longLabel),
         ),
         const SizedBox(height: 16),
         const ShowColorSchemeColors(),
@@ -138,7 +228,9 @@ class HomePage extends StatelessWidget {
 }
 
 class DrawerDesktopWrapper extends StatelessWidget {
-  const DrawerDesktopWrapper({Key? key}) : super(key: key);
+  const DrawerDesktopWrapper({Key? key, this.longLabel = false})
+      : super(key: key);
+  final bool longLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -152,9 +244,9 @@ class DrawerDesktopWrapper extends StatelessWidget {
           removeTop: true,
           removeLeft: true,
           removeRight: true,
-          child: const SizedBox(
-            height: 320,
-            child: NavigationDrawerShowcase(),
+          child: SizedBox(
+            height: 330,
+            child: NavigationDrawerShowcase(longLabel: longLabel),
           ),
         ),
       ],
@@ -163,9 +255,9 @@ class DrawerDesktopWrapper extends StatelessWidget {
 }
 
 class NavigationDrawerShowcase extends StatefulWidget {
-  const NavigationDrawerShowcase({
-    super.key,
-  });
+  const NavigationDrawerShowcase({super.key, this.longLabel = false});
+
+  final bool longLabel;
 
   @override
   State<NavigationDrawerShowcase> createState() =>
@@ -174,28 +266,11 @@ class NavigationDrawerShowcase extends StatefulWidget {
 
 class _NavigationDrawerShowcaseState extends State<NavigationDrawerShowcase> {
   int selectedIndex = 0;
-  late final GlobalKey _key = GlobalKey();
-  RenderBox? renderBox;
-
-  _afterLayout(_) {
-    setState(() {
-      if (_key.currentContext?.findRenderObject() != null) {
-        renderBox = _key.currentContext!.findRenderObject() as RenderBox;
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
-  }
 
   @override
   Widget build(BuildContext context) {
-    final double width = renderBox?.size.width ?? 0;
     return NavigationDrawer(
-      key: _key,
+      key: widget.key,
       selectedIndex: selectedIndex,
       onDestinationSelected: (int value) {
         setState(() {
@@ -204,31 +279,105 @@ class _NavigationDrawerShowcaseState extends State<NavigationDrawerShowcase> {
       },
       children: <Widget>[
         const SizedBox(height: 16),
+        // theme.brightness == Brightness.light
+        //     ? const Text('Light theme')
+        //     : const Text('Dark theme'),
         const NavigationDrawerDestination(
           icon: Badge(
+            label: Text('26'),
+            child: Icon(Icons.chat_bubble_outline),
+          ),
+          selectedIcon: Badge(
             label: Text('26'),
             child: Icon(Icons.chat_bubble),
           ),
           label: Text('Chat'),
         ),
         const NavigationDrawerDestination(
-          icon: Icon(Icons.beenhere),
+          icon: Icon(Icons.beenhere_outlined),
+          selectedIcon: Icon(Icons.beenhere),
           label: Text('Tasks'),
         ),
         const Divider(),
-        const NavigationDrawerDestination(
-          icon: Icon(Icons.create_new_folder),
-          label: Text('Folder'),
+        NavigationDrawerDestination(
+          icon: const Icon(Icons.create_new_folder_outlined),
+          selectedIcon: const Icon(Icons.create_new_folder),
+          label: widget.longLabel
+              ? const Text('Folder with a very long name')
+              : const Text('Folder'),
         ),
         const NavigationDrawerDestination(
-          icon: Icon(Icons.logout),
-          label: Text('Logout'),
+          icon: Icon(Icons.settings_outlined),
+          selectedIcon: Icon(Icons.settings),
+          label: Text('Settings'),
         ),
-        const SizedBox(height: 16),
-        Text('Drawer is $width dp wide', textAlign: TextAlign.center),
       ],
     );
   }
+}
+
+/// A Theme Settings class to bundle properties we want to modify on our
+/// theme interactively.
+@immutable
+class ThemeSettings with Diagnosticable {
+  final bool useMaterial3;
+  final bool useDrawerWidth;
+  final bool useIndicatorWidth;
+  final bool useTileHeight;
+
+  const ThemeSettings({
+    required this.useMaterial3,
+    required this.useDrawerWidth,
+    required this.useIndicatorWidth,
+    required this.useTileHeight,
+  });
+
+  /// Flutter debug properties override, includes toString.
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3));
+    properties.add(DiagnosticsProperty<bool>('useDrawerWidth', useDrawerWidth));
+    properties
+        .add(DiagnosticsProperty<bool>('useIndicatorWidth', useIndicatorWidth));
+    properties.add(DiagnosticsProperty<bool>('useTileHeight', useTileHeight));
+  }
+
+  /// Copy the object with one or more provided properties changed.
+  ThemeSettings copyWith({
+    bool? useMaterial3,
+    bool? useDrawerWidth,
+    bool? useIndicatorWidth,
+    bool? useTileHeight,
+  }) {
+    return ThemeSettings(
+      useMaterial3: useMaterial3 ?? this.useMaterial3,
+      useDrawerWidth: useDrawerWidth ?? this.useDrawerWidth,
+      useIndicatorWidth: useIndicatorWidth ?? this.useIndicatorWidth,
+      useTileHeight: useTileHeight ?? this.useTileHeight,
+    );
+  }
+
+  /// Override the equality operator.
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is ThemeSettings &&
+        other.useMaterial3 == useMaterial3 &&
+        other.useDrawerWidth == useDrawerWidth &&
+        other.useIndicatorWidth == useIndicatorWidth &&
+        other.useTileHeight == useTileHeight;
+  }
+
+  /// Override for hashcode, dart.ui Jenkins based.
+  @override
+  int get hashCode => Object.hashAll(<Object?>[
+        useMaterial3.hashCode,
+        useDrawerWidth.hashCode,
+        useIndicatorWidth.hashCode,
+        useTileHeight.hashCode,
+      ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
