@@ -1,8 +1,35 @@
-// NOTE:
-//
-// Copy the code for the issue sample to test here. It always only contains
-// the sample last looked at.
+## Menu button text animates on hover/focus/press state
 
+A menu selection label is not supposed to animate when it is highlighted, nor does it do so on icons in the menu, only on text.
+
+With a default theme this issue cannot be observed since text color is is same for hover/select/pressed state so it does not change. By making e.g. a themed menu version where selected item uses a quite common primary colored menu selection highlight design, the menu text becomes reversed compared to not highlighted item and the issue can be observed.
+
+In the example, the DropdownMenu contains more icons and the odd combination of text highlight animating, while icons do not animate can be observed more easily. Neither should animate.
+
+## Expected results
+
+Expect highlighted text and icon on a highlighted menu item button to not have any animation. It is not mentioned in [M3 spec](https://m3.material.io/components/menus/specs), nor can one be seen with default theme. Below a recording of it, with slow motion animation to represent expected behavior.
+
+https://user-images.githubusercontent.com/39990307/228306371-22b649c2-548a-4f72-9756-5b52c2afc3da.mov
+
+
+## Actual results
+
+Menu item labels animate to new label color when highlighted, but only for the for text part, not on icon part.
+
+- Icon has correct expected behavior.
+- Text has unexpected wrong behavior.
+
+https://user-images.githubusercontent.com/39990307/228306593-8de9f43c-32e6-4895-8228-1f000a45362b.mov
+
+
+## Issue sample code
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -42,76 +69,76 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
     menuButtonTheme: settings.useCustomMenu
         ? MenuButtonThemeData(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.resolveWith(
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.resolveWith(
+              (Set<MaterialState> states) {
+            if (states.contains(MaterialState.pressed)) {
+              return colorScheme.primary;
+            }
+            if (states.contains(MaterialState.hovered)) {
+              return colorScheme.primary;
+            }
+            if (states.contains(MaterialState.focused)) {
+              return colorScheme.primary;
+            }
+            return Colors.transparent;
+          },
+        ),
+        foregroundColor: MaterialStateProperty.resolveWith(
                 (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed)) {
-                    return colorScheme.primary;
-                  }
-                  if (states.contains(MaterialState.hovered)) {
-                    return colorScheme.primary;
-                  }
-                  if (states.contains(MaterialState.focused)) {
-                    return colorScheme.primary;
-                  }
-                  return Colors.transparent;
-                },
-              ),
-              foregroundColor: MaterialStateProperty.resolveWith(
-                  (Set<MaterialState> states) {
-                if (states.contains(MaterialState.disabled)) {
-                  return colorScheme.onSurface.withOpacity(0.38);
-                }
-                if (states.contains(MaterialState.pressed)) {
-                  return colorScheme.onPrimary;
-                }
-                if (states.contains(MaterialState.hovered)) {
-                  return colorScheme.onPrimary;
-                }
-                if (states.contains(MaterialState.focused)) {
-                  return colorScheme.onPrimary;
-                }
-                return colorScheme.onSurface;
-              }),
-              iconColor: MaterialStateProperty.resolveWith(
-                  (Set<MaterialState> states) {
-                if (states.contains(MaterialState.disabled)) {
-                  return colorScheme.onSurface.withOpacity(0.38);
-                }
-                if (states.contains(MaterialState.pressed)) {
-                  return colorScheme.onPrimary;
-                }
-                if (states.contains(MaterialState.hovered)) {
-                  return colorScheme.onPrimary;
-                }
-                if (states.contains(MaterialState.focused)) {
-                  return colorScheme.onPrimary;
-                }
-                return colorScheme.onSurfaceVariant;
-              }),
-              overlayColor: MaterialStateProperty.resolveWith(
+              if (states.contains(MaterialState.disabled)) {
+                return colorScheme.onSurface.withOpacity(0.38);
+              }
+              if (states.contains(MaterialState.pressed)) {
+                return colorScheme.onPrimary;
+              }
+              if (states.contains(MaterialState.hovered)) {
+                return colorScheme.onPrimary;
+              }
+              if (states.contains(MaterialState.focused)) {
+                return colorScheme.onPrimary;
+              }
+              return colorScheme.onSurface;
+            }),
+        iconColor: MaterialStateProperty.resolveWith(
                 (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed)) {
-                    return colorScheme.onPrimary.withOpacity(0.12);
-                  }
-                  if (states.contains(MaterialState.hovered)) {
-                    return colorScheme.onPrimary.withOpacity(0.08);
-                  }
-                  if (states.contains(MaterialState.focused)) {
-                    return colorScheme.onPrimary.withOpacity(0.12);
-                  }
-                  return Colors.transparent;
-                },
-              ),
-            ),
-          )
+              if (states.contains(MaterialState.disabled)) {
+                return colorScheme.onSurface.withOpacity(0.38);
+              }
+              if (states.contains(MaterialState.pressed)) {
+                return colorScheme.onPrimary;
+              }
+              if (states.contains(MaterialState.hovered)) {
+                return colorScheme.onPrimary;
+              }
+              if (states.contains(MaterialState.focused)) {
+                return colorScheme.onPrimary;
+              }
+              return colorScheme.onSurfaceVariant;
+            }),
+        overlayColor: MaterialStateProperty.resolveWith(
+              (Set<MaterialState> states) {
+            if (states.contains(MaterialState.pressed)) {
+              return colorScheme.onPrimary.withOpacity(0.12);
+            }
+            if (states.contains(MaterialState.hovered)) {
+              return colorScheme.onPrimary.withOpacity(0.08);
+            }
+            if (states.contains(MaterialState.focused)) {
+              return colorScheme.onPrimary.withOpacity(0.12);
+            }
+            return Colors.transparent;
+          },
+        ),
+      ),
+    )
         : null,
   );
 }
@@ -491,9 +518,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomMenu.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    useCustomMenu.hashCode,
+  ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
@@ -777,3 +804,70 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+
+</details>
+
+## Used Flutter version
+
+Channel master, 3.9.0-18.0.pre.39
+
+<details>
+  <summary>Flutter doctor</summary>
+
+```
+
+flutter doctor -v          
+[✓] Flutter (Channel master, 3.9.0-18.0.pre.39, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.9.0-18.0.pre.39 on channel master at /Users/rydmike/fvm/versions/master
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision f528f9f56c (58 minutes ago), 2023-03-28 11:15:08 -0400
+    • Engine revision 0b1c7c8760
+    • Dart version 3.0.0 (build 3.0.0-375.0.dev)
+    • DevTools version 2.22.2
+    • If those were intentional, you can disregard the above warnings; however it is recommended
+      to use "git" directly to perform update checks and upgrades.
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.2)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14C18
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+
+[✓] IntelliJ IDEA Community Edition (version 2022.3.3)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 72.1.4
+    • Dart plugin version 223.8888
+
+[✓] VS Code (version 1.76.2)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.60.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.2.1 22D68 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 111.0.5563.146
+
+[✓] Network resources
+    • All expected network resources are available.
+
+```
+
+</details>
