@@ -3,7 +3,6 @@
 // Copy the code for the issue sample to test here. It always only contains
 // the sample last looked at.
 
-// MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
 //
@@ -27,6 +26,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// This issue reported here: https://github.com/flutter/flutter/issues/123631
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);

@@ -1,8 +1,48 @@
-// NOTE:
-//
-// Copy the code for the issue sample to test here. It always only contains
-// the sample last looked at.
+## DropdownMenu's menu overlay size issue
 
+If you a place a `DropdownMenu` in a `ListView`, the menu overlay expands to fill the width of the layout.
+
+The documentation states:
+
+> **width** property
+>
+> Determines the width of the DropdownMenu. If this is null, the width of the DropdownMenu will be the same as the width of the widest menu item plus the width of the leading/trailing icon.
+
+See: https://api.flutter.dev/flutter/material/DropdownMenu/width.html
+
+While this applies to the DropdownMenu itself, its input part, it is however getting the correct menu width that the menu would normally have from its items, plus the icons, as stated above, but when opened, the menu overlay fills the view.
+
+When opening a menu overlay from a `MenuBar` or the `MenuAnchor`, even when they are placed in a `ListView`, they do not exhibit this behavior. Neither does `DropdownMenu`, if it is in a `Column`.
+
+## Expected results
+
+Expected `DropdownMenu`'s opened menu to be same as width as its menu.
+
+![Screenshot 2023-03-28 at 21 06 37](https://user-images.githubusercontent.com/39990307/228339797-af7a37e5-d094-45f0-a638-191055fd3ee6.png)
+
+
+## Actual results
+
+Opened `DropdownMenu` overlay fills the viewport when used in a ListView.
+
+![Screenshot 2023-03-28 at 21 06 54](https://user-images.githubusercontent.com/39990307/228339834-2ffd5da1-dbe8-4d7f-bd9f-9929a5ae1574.png)
+
+
+
+**Workarounds:**
+
+Known workaround, place `DropdownMenu` in a `Column` in the `ListView`.
+
+![Screenshot 2023-03-28 at 21 07 04](https://user-images.githubusercontent.com/39990307/228339878-add2da25-c41a-4a95-a77f-55d1d0b05717.png)
+
+
+
+## Issue sample code
+
+<details>
+<summary>Code sample</summary>
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -43,7 +83,7 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
@@ -397,9 +437,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomMenu.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    useCustomMenu.hashCode,
+  ]);
 }
 
 /// An enhanced enum to define the available menus and their shortcuts.
@@ -455,7 +495,7 @@ class _MenuAnchorContextMenuState extends State<MenuAnchorContextMenu> {
     // be registered to apply to the entire app. Menus don't register their
     // shortcuts, they only display the shortcut hint text.
     final Map<ShortcutActivator, Intent> shortcuts =
-        <ShortcutActivator, Intent>{
+    <ShortcutActivator, Intent>{
       for (final MenuEntry item in MenuEntry.values)
         if (item.shortcut != null)
           item.shortcut!: VoidCallbackIntent(() => _activate(item)),
@@ -543,7 +583,7 @@ class _MenuAnchorContextMenuState extends State<MenuAnchorContextMenu> {
               children: <Widget>[
                 const Text(
                   'Click anywhere on this container to show the '
-                  'MenuAnchor context menu.',
+                      'MenuAnchor context menu.',
                   textAlign: TextAlign.center,
                 ),
                 const Text(
@@ -886,3 +926,72 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+
+</details>
+
+
+## Used Flutter version
+
+Channel master, 3.9.0-18.0.pre.39
+
+<details>
+  <summary>Flutter doctor</summary>
+
+
+```
+
+flutter doctor -v          
+[✓] Flutter (Channel master, 3.9.0-18.0.pre.39, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.9.0-18.0.pre.39 on channel master at /Users/rydmike/fvm/versions/master
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision f528f9f56c (58 minutes ago), 2023-03-28 11:15:08 -0400
+    • Engine revision 0b1c7c8760
+    • Dart version 3.0.0 (build 3.0.0-375.0.dev)
+    • DevTools version 2.22.2
+    • If those were intentional, you can disregard the above warnings; however it is recommended
+      to use "git" directly to perform update checks and upgrades.
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.2)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14C18
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+
+[✓] IntelliJ IDEA Community Edition (version 2022.3.3)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 72.1.4
+    • Dart plugin version 223.8888
+
+[✓] VS Code (version 1.76.2)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.60.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.2.1 22D68 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 111.0.5563.146
+
+[✓] Network resources
+    • All expected network resources are available.
+
+```
+
+</details>

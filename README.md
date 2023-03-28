@@ -10,5 +10,6 @@ The following issues have their reproduction code sample, and also the original 
  - https://github.com/flutter/flutter/issues/123380 (04)
  - https://github.com/flutter/flutter/issues/123507 (05) ☂️ Contains 6 issues
  - https://github.com/flutter/flutter/issues/123615 (06)
+ - https://github.com/flutter/flutter/issues/123631 (07)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.
