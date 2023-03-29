@@ -1,8 +1,98 @@
-// NOTE:
-//
-// Copy the code for the issue sample to test here. It always only contains
-// the sample last looked at.
+## DropdownMenu selected item does not use MaterialState.selected.
 
+The style indication of the found and selected item in a `DropdownMenu` does not use `MaterialState.selected`. Its style is hard coded.
+
+This makes it impossible to provide a style/themed consistent style for the selected item when using a custom theme or widget properties in a `DropdownMenu`. One does have to live with the default style only for entire menu, or accept a deviant and out of style looking selected item. 
+
+
+## Expected results
+
+Expected to be able to style the found select item in a `DropdownMenu` to a style where the selected item would match the style of used custom, and also do so on hover/focus/pressed.
+
+## Actual results
+
+Get a hard coded style of selected item that does not fit with other possible styling capabilities offered by the `DropdownMenu`.  
+
+## Proposal
+
+Maybe consider using the `MaterialState.selected` state for found item and thus enable customizing it using the already available theme and features of used underlying `ButtonStyleButton``
+
+### Fixed version for expected result
+
+An experimental and revised plus fixed version of `_buildButtons(..)` function from file `dropdown_menu.dart` used to generate the expected result is included for references below.
+
+It can be used as starting point for an actual fix.
+
+
+```dart
+  List<Widget> _buildButtons(
+    List<DropdownMenuEntry<T>> filteredEntries,
+    TextEditingController textEditingController,
+    TextDirection textDirection,
+    { int? focusedIndex }
+  ) {
+    final List<Widget> result = <Widget>[];
+    final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
+    final EdgeInsetsGeometry effectivePadding;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        effectivePadding = EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding);
+      case TextDirection.ltr:
+        effectivePadding = EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding);
+    }
+    final ThemeData theme = Theme.of(context);
+    for (int i = 0; i < filteredEntries.length; i++) {
+      final DropdownMenuEntry<T> entry = filteredEntries[i];
+      ButtonStyle effectiveStyle = entry.style ?? theme.menuButtonTheme?.style?.copyWith(padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(effectivePadding)) ?? MenuItemButton.styleFrom(padding: effectivePadding);
+      final Color focusedBackgroundColor = effectiveStyle.backgroundColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withOpacity(0.12);
+      final Color focusedForegroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface;
+      final Color focusedIconColor = effectiveStyle.iconColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurfaceVariant;
+      final Color focusedOverlayColor = effectiveStyle.overlayColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withOpacity(0.12);
+
+      // Simulate the focused state because the text field should always be focused
+      // during traversal. Include potential MenuItemButton theme in the focus
+      // simulation for all colors on the MenuItemButton.
+      effectiveStyle = entry.enabled && i == focusedIndex
+        ? effectiveStyle.copyWith(
+            backgroundColor: MaterialStatePropertyAll<Color>(focusedBackgroundColor),
+            foregroundColor: MaterialStatePropertyAll<Color>(focusedForegroundColor),
+            iconColor: MaterialStatePropertyAll<Color>(focusedIconColor),
+            overlayColor: MaterialStatePropertyAll<Color>(focusedOverlayColor),
+          )
+        : effectiveStyle;
+
+      final MenuItemButton menuItemButton = MenuItemButton(
+        style: effectiveStyle,
+        leadingIcon: entry.leadingIcon,
+        trailingIcon: entry.trailingIcon,
+        onPressed: entry.enabled
+          ? () {
+              textEditingController.text = entry.label;
+              textEditingController.selection =
+                TextSelection.collapsed(offset: textEditingController.text.length);
+              currentHighlight = widget.enableSearch ? i : null;
+              widget.onSelected?.call(entry.value);
+            }
+          : null,
+        requestFocusOnHover: false,
+        child: Text(entry.label),
+      );
+      result.add(menuItemButton);
+    }
+
+    return result;
+  }
+```
+
+
+## Issue sample code
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
+// MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
 //
@@ -25,9 +115,6 @@
 // SOFTWARE.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-// This issue reported here: https://github.com/flutter/flutter/issues/123631
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
@@ -44,11 +131,77 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
+    menuButtonTheme: settings.useCustomMenu
+        ? MenuButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.resolveWith(
+              (Set<MaterialState> states) {
+            if (states.contains(MaterialState.pressed)) {
+              return colorScheme.primary;
+            }
+            if (states.contains(MaterialState.hovered)) {
+              return colorScheme.primary;
+            }
+            if (states.contains(MaterialState.focused)) {
+              return colorScheme.primary;
+            }
+            return Colors.transparent;
+          },
+        ),
+        foregroundColor: MaterialStateProperty.resolveWith(
+                (Set<MaterialState> states) {
+              if (states.contains(MaterialState.disabled)) {
+                return colorScheme.onSurface.withOpacity(0.38);
+              }
+              if (states.contains(MaterialState.pressed)) {
+                return colorScheme.onPrimary;
+              }
+              if (states.contains(MaterialState.hovered)) {
+                return colorScheme.onPrimary;
+              }
+              if (states.contains(MaterialState.focused)) {
+                return colorScheme.onPrimary;
+              }
+              return colorScheme.onSurface;
+            }),
+        iconColor: MaterialStateProperty.resolveWith(
+                (Set<MaterialState> states) {
+              if (states.contains(MaterialState.disabled)) {
+                return colorScheme.onSurface.withOpacity(0.38);
+              }
+              if (states.contains(MaterialState.pressed)) {
+                return colorScheme.onPrimary;
+              }
+              if (states.contains(MaterialState.hovered)) {
+                return colorScheme.onPrimary;
+              }
+              if (states.contains(MaterialState.focused)) {
+                return colorScheme.onPrimary;
+              }
+              return colorScheme.onSurfaceVariant;
+            }),
+        overlayColor: MaterialStateProperty.resolveWith(
+              (Set<MaterialState> states) {
+            if (states.contains(MaterialState.pressed)) {
+              return colorScheme.onPrimary.withOpacity(0.12);
+            }
+            if (states.contains(MaterialState.hovered)) {
+              return colorScheme.onPrimary.withOpacity(0.08);
+            }
+            if (states.contains(MaterialState.focused)) {
+              return colorScheme.onPrimary.withOpacity(0.12);
+            }
+            return Colors.transparent;
+          },
+        ),
+      ),
+    )
+        : null,
   );
 }
 
@@ -69,7 +222,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
   TextDirection textDirection = TextDirection.ltr;
   ThemeSettings settings = const ThemeSettings(
     useMaterial3: true,
-    useCustomMenu: false,
+    useCustomMenu: true,
   );
 
   @override
@@ -83,7 +236,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('DropdownMenu Issue'),
+            title: const Text('MenuButton Issue'),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -121,6 +274,18 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
                 settings = value;
               });
             },
+            longLabel: longLabel,
+            onLongLabel: (bool value) {
+              setState(() {
+                longLabel = value;
+              });
+            },
+            textDirection: textDirection,
+            onTextDirection: (TextDirection value) {
+              setState(() {
+                textDirection = value;
+              });
+            },
           ),
         ),
       ),
@@ -133,105 +298,67 @@ class HomePage extends StatelessWidget {
     super.key,
     required this.settings,
     required this.onSettings,
+    required this.longLabel,
+    required this.onLongLabel,
+    required this.textDirection,
+    required this.onTextDirection,
   });
   final ThemeSettings settings;
   final ValueChanged<ThemeSettings> onSettings;
+  final bool longLabel;
+  final ValueChanged<bool> onLongLabel;
+  final TextDirection textDirection;
+  final ValueChanged<TextDirection> onTextDirection;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       children: [
         const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Text('DropdownMenu overlay width in ListView fills width of '
-              'viewport. Same issue not seen with menu overlay when used from '
-              'a MenuBar or MenuAnchor in a ListView.'),
+        const Text('Menu item text animates on hover/focus/press state change\n'
+            '\n'
+            'A menu highlight is not supposed to animate the text color '
+            'transition, nor does it on icons in the menu, only on text.\n'
+            '\n'
+            'With a default theme this issue cannot '
+            'be observed since text color is the same for hover/select/pressed '
+            'state, so it does not change. By making a themed menu version '
+            'where selected item uses a quite common primary colored menu '
+            'selection highlight, the menu text becomes reversed and the '
+            'issue can be observed.\n'
+            '\n'
+            'The DropdownMenu contains more icons and the odd combination of '
+            'text highlight animating while icons do not, can be observed more '
+            'easily.'
+            ''),
+        SwitchListTile(
+          title: const Text('Enable custom menu theme'),
+          value: settings.useCustomMenu,
+          onChanged: (bool value) {
+            onSettings(settings.copyWith(useCustomMenu: value));
+          },
         ),
-        const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Text('OK: DropdownMenu overlay width in a Column'),
+        SwitchListTile(
+          title: const Text('Text directionality'),
+          subtitle: const Text('OFF=LTR  ON=RTL'),
+          value: textDirection == TextDirection.rtl,
+          onChanged: (bool value) {
+            value
+                ? onTextDirection(TextDirection.rtl)
+                : onTextDirection(TextDirection.ltr);
+          },
         ),
         const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          padding: EdgeInsets.all(12.0),
+          child: MenuBarShowcase(),
+        ),
+        const Padding(
+          padding: EdgeInsets.all(12.0),
           child: DropDownMenuShowcase(),
         ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: const <Widget>[
-              SizedBox(height: 16),
-              Text('FAIL: DropdownMenu overlay width in ListView'),
-              DropDownMenuShowcase(),
-              SizedBox(height: 16),
-              Text('OK: DropdownMenu overlay width in ListView '
-                  'wrapped with Column'),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [DropDownMenuShowcase()],
-              ),
-              SizedBox(height: 16),
-              Text('OK: Other Menus and their overlays in a ListView'),
-              MenuBarShowcase(),
-              SizedBox(height: 16),
-              MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
-              SizedBox(height: 16),
-              ShowColorSchemeColors(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class DropDownMenuShowcase extends StatefulWidget {
-  const DropDownMenuShowcase({super.key});
-
-  @override
-  State<DropDownMenuShowcase> createState() => _DropDownMenuShowcaseState();
-}
-
-class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
-  String selectedItem = '';
-  @override
-  Widget build(BuildContext context) {
-    return DropdownMenu<String>(
-      initialSelection: selectedItem,
-      onSelected: (String? value) {
-        setState(() {
-          selectedItem = value ?? 'one';
-        });
-      },
-      dropdownMenuEntries: const <DropdownMenuEntry<String>>[
-        DropdownMenuEntry<String>(
-          label: 'Alarm settings',
-          leadingIcon: Icon(Icons.alarm),
-          value: 'one',
-        ),
-        DropdownMenuEntry<String>(
-          label: 'Disabled settings',
-          leadingIcon: Icon(Icons.settings),
-          value: 'two',
-          enabled: false,
-        ),
-        DropdownMenuEntry<String>(
-          label: 'Cabin overview',
-          leadingIcon: Icon(Icons.cabin),
-          value: 'three',
-        ),
-        DropdownMenuEntry<String>(
-          label: 'Surveillance view',
-          leadingIcon: Icon(Icons.camera_outdoor_rounded),
-          value: 'four',
-        ),
-        DropdownMenuEntry<String>(
-          label: 'Water alert',
-          leadingIcon: Icon(Icons.water_damage),
-          value: 'five',
-        ),
+        const SizedBox(height: 16),
+        const ShowColorSchemeColors(),
       ],
     );
   }
@@ -354,6 +481,61 @@ class MenuBarShowcase extends StatelessWidget {
   }
 }
 
+class DropDownMenuShowcase extends StatefulWidget {
+  const DropDownMenuShowcase({super.key});
+
+  @override
+  State<DropDownMenuShowcase> createState() => _DropDownMenuShowcaseState();
+}
+
+class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
+  String selectedItem = '';
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        DropdownMenu<String>(
+          initialSelection: selectedItem,
+          onSelected: (String? value) {
+            setState(() {
+              selectedItem = value ?? 'one';
+            });
+          },
+          dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+            DropdownMenuEntry<String>(
+              label: 'Alarm settings',
+              leadingIcon: Icon(Icons.alarm),
+              value: 'one',
+            ),
+            DropdownMenuEntry<String>(
+              label: 'Disabled settings',
+              leadingIcon: Icon(Icons.settings),
+              value: 'two',
+              enabled: false,
+            ),
+            DropdownMenuEntry<String>(
+              label: 'Cabin overview',
+              leadingIcon: Icon(Icons.cabin),
+              value: 'three',
+            ),
+            DropdownMenuEntry<String>(
+              label: 'Surveillance view',
+              leadingIcon: Icon(Icons.camera_outdoor_rounded),
+              value: 'four',
+            ),
+            DropdownMenuEntry<String>(
+              label: 'Water alert',
+              leadingIcon: Icon(Icons.water_damage),
+              value: 'five',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 /// A Theme Settings class to bundle properties we want to modify on our
 /// theme interactively.
 @immutable
@@ -398,212 +580,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomMenu.hashCode,
-      ]);
-}
-
-/// An enhanced enum to define the available menus and their shortcuts.
-///
-/// Using an enum for menu definition is not required, but this illustrates how
-/// they could be used for simple menu systems.
-enum MenuEntry {
-  about('About'),
-  showMessage(
-      'Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
-  hideMessage(
-      'Hide Message', SingleActivator(LogicalKeyboardKey.keyH, control: true)),
-  colorMenu('Color Menu'),
-  colorRed('Red', SingleActivator(LogicalKeyboardKey.keyR, control: true)),
-  colorGreen('Green', SingleActivator(LogicalKeyboardKey.keyG, control: true)),
-  colorBlue('Blue', SingleActivator(LogicalKeyboardKey.keyB, control: true));
-
-  const MenuEntry(this.label, [this.shortcut]);
-  final String label;
-  final MenuSerializableShortcut? shortcut;
-}
-
-class MenuAnchorContextMenu extends StatefulWidget {
-  const MenuAnchorContextMenu({super.key, required this.message});
-
-  final String message;
-
-  @override
-  State<MenuAnchorContextMenu> createState() => _MenuAnchorContextMenuState();
-}
-
-class _MenuAnchorContextMenuState extends State<MenuAnchorContextMenu> {
-  MenuEntry? _lastSelection;
-  final MenuController _menuController = MenuController();
-  ShortcutRegistryEntry? _shortcutsEntry;
-  bool get showingMessage => _showingMessage;
-  bool _showingMessage = false;
-  set showingMessage(bool value) {
-    if (_showingMessage != value) {
-      setState(() {
-        _showingMessage = value;
-      });
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Dispose of any previously registered shortcuts, since they are about to
-    // be replaced.
-    _shortcutsEntry?.dispose();
-    // Collect the shortcuts from the different menu selections so that they can
-    // be registered to apply to the entire app. Menus don't register their
-    // shortcuts, they only display the shortcut hint text.
-    final Map<ShortcutActivator, Intent> shortcuts =
-        <ShortcutActivator, Intent>{
-      for (final MenuEntry item in MenuEntry.values)
-        if (item.shortcut != null)
-          item.shortcut!: VoidCallbackIntent(() => _activate(item)),
-    };
-    // Register the shortcuts with the ShortcutRegistry.
-    final Map<ShortcutActivator, Intent>? entries =
-        ShortcutRegistry.maybeOf(context)?.shortcuts;
-    // Mod to avoid issue of entries being added multiple times, the dispose
-    // of them does not seem to work all the time. If this widget is used and
-    // potentially shown in many places, the only shortcut entries we should
-    // have are the same ones, if it exists and has not been disposed when
-    // this is called we can add it, if it exists it is the one we want already.
-    // We could also check for the specific entries, but for this workaround
-    // works for this demo. ShortcutRegistry is intended to be used as one
-    // global setting in the app, it should be higher up in the tree, then
-    // we would not have this issue if this widget is used in multiple views
-    // and potentially even shown one same screen.
-    if (entries?.isEmpty ?? false) {
-      _shortcutsEntry = ShortcutRegistry.of(context).addAll(shortcuts);
-    }
-  }
-
-  @override
-  void dispose() {
-    _shortcutsEntry?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return GestureDetector(
-      onTapDown: _handleTapDown,
-      child: MenuAnchor(
-        controller: _menuController,
-        anchorTapClosesMenu: true,
-        menuChildren: <Widget>[
-          MenuItemButton(
-            child: Text(MenuEntry.about.label),
-            onPressed: () => _activate(MenuEntry.about),
-          ),
-          const MenuItemButton(
-            child: Text('Disabled item'),
-          ),
-          if (_showingMessage)
-            MenuItemButton(
-              onPressed: () => _activate(MenuEntry.hideMessage),
-              shortcut: MenuEntry.hideMessage.shortcut,
-              child: Text(MenuEntry.hideMessage.label),
-            ),
-          if (!_showingMessage)
-            MenuItemButton(
-              onPressed: () => _activate(MenuEntry.showMessage),
-              shortcut: MenuEntry.showMessage.shortcut,
-              child: Text(MenuEntry.showMessage.label),
-            ),
-          SubmenuButton(
-            menuChildren: <Widget>[
-              MenuItemButton(
-                onPressed: () => _activate(MenuEntry.colorRed),
-                shortcut: MenuEntry.colorRed.shortcut,
-                child: Text(MenuEntry.colorRed.label),
-              ),
-              MenuItemButton(
-                onPressed: () => _activate(MenuEntry.colorGreen),
-                shortcut: MenuEntry.colorGreen.shortcut,
-                child: Text(MenuEntry.colorGreen.label),
-              ),
-              MenuItemButton(
-                onPressed: () => _activate(MenuEntry.colorBlue),
-                shortcut: MenuEntry.colorBlue.shortcut,
-                child: Text(MenuEntry.colorBlue.label),
-              ),
-            ],
-            child: const Text('Color'),
-          ),
-        ],
-        child: Card(
-          margin: EdgeInsets.zero,
-          elevation: 1,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'Click anywhere on this container to show the '
-                  'MenuAnchor context menu.',
-                  textAlign: TextAlign.center,
-                ),
-                const Text(
-                  'Menu keyboard shortcuts also work.',
-                  textAlign: TextAlign.center,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    showingMessage ? widget.message : '',
-                    style: theme.textTheme.bodyLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Text(
-                  _lastSelection != null
-                      ? 'Last Selected: ${_lastSelection!.label}'
-                      : '',
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _activate(MenuEntry selection) {
-    setState(() {
-      _lastSelection = selection;
-    });
-    switch (selection) {
-      case MenuEntry.about:
-        showAboutDialog(
-          context: context,
-          useRootNavigator: false,
-          applicationName: 'MenuAnchor Demo',
-          applicationVersion: '1.0.0',
-        );
-        break;
-      case MenuEntry.showMessage:
-      case MenuEntry.hideMessage:
-        showingMessage = !showingMessage;
-        break;
-      case MenuEntry.colorMenu:
-        break;
-      case MenuEntry.colorRed:
-        break;
-      case MenuEntry.colorGreen:
-        break;
-      case MenuEntry.colorBlue:
-        break;
-    }
-  }
-
-  void _handleTapDown(TapDownDetails details) {
-    _menuController.open(position: details.localPosition);
-  }
+    useMaterial3.hashCode,
+    useCustomMenu.hashCode,
+  ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
@@ -887,3 +866,70 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+
+</details>
+
+## Used Flutter version
+
+Channel master, 3.9.0-18.0.pre.39
+
+<details>
+  <summary>Flutter doctor</summary>
+
+```
+
+flutter doctor -v          
+[✓] Flutter (Channel master, 3.9.0-18.0.pre.39, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.9.0-18.0.pre.39 on channel master at /Users/rydmike/fvm/versions/master
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision f528f9f56c (58 minutes ago), 2023-03-28 11:15:08 -0400
+    • Engine revision 0b1c7c8760
+    • Dart version 3.0.0 (build 3.0.0-375.0.dev)
+    • DevTools version 2.22.2
+    • If those were intentional, you can disregard the above warnings; however it is recommended
+      to use "git" directly to perform update checks and upgrades.
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.2)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14C18
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+
+[✓] IntelliJ IDEA Community Edition (version 2022.3.3)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 72.1.4
+    • Dart plugin version 223.8888
+
+[✓] VS Code (version 1.76.2)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.60.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.2.1 22D68 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 111.0.5563.146
+
+[✓] Network resources
+    • All expected network resources are available.
+
+```
+
+</details>
