@@ -1,3 +1,53 @@
+## IconButton theming destroys variant styles
+
+This [PR #121884](https://github.com/flutter/flutter/pull/121884) added M3 variant **IconButtons** variants `IconButton.filled`, `IconButton.filledTonal` and `IconButton.outlined` to the framework. They are lovely. However, if we add theming to IconButton's IconButtonThemeData, we loose the style of all these lovely variant **IconButtons**. They all get the same style as `IconButton`.
+
+## Expected results
+
+Expect to be able to theme the M3 `IconButton`s and its variants individually, like the default none themed behavior can change them per variant.
+
+By default the `IconButtons` look like this:
+
+| M3 IconButton Variants - unselected | M3 IconButton Variants - selected |
+|-------------------------------------|-----------------------------------|
+| ![Screenshot 2023-03-31 at 2 03 06](https://user-images.githubusercontent.com/39990307/228987389-e2cc0485-60eb-4204-a098-19475bc46067.png) | ![Screenshot 2023-03-31 at 2 03 17](https://user-images.githubusercontent.com/39990307/228987441-4be3bb1c-019e-4ad9-a8a7-7f6dde2860ea.png) |
+
+
+## Actual results
+
+If we create a theme for **IconButtons** where we customize foreground, background and overlay colors, we loose the styles of the M3 `IconButton` variants. There is no way to theme the main `IconButton` and its three variants `IconButton.filled`, `IconButton.filledTonal` and `IconButton.outlined` independently, without affecting them all.
+
+
+| M3 IconButton Variants - unselected | M3 IconButton Variants - selected |
+|-------------------------------------|-----------------------------------|
+| ![Screenshot 2023-03-31 at 2 03 29](https://user-images.githubusercontent.com/39990307/228987475-9726c66d-5792-4ea4-9a17-2a2461252547.png) | ![Screenshot 2023-03-31 at 2 03 36](https://user-images.githubusercontent.com/39990307/228987535-75db6c4c-8ee9-4574-a7f5-b832771a71bc.png) |
+
+
+This issue was mentioned in comment https://github.com/flutter/flutter/pull/121884#issuecomment-1458505977. Adding it as its own issue so it is not forgotten and can be tracked.
+
+>**NOTE:** The M3 `IconButton` with its variants are only available in master channel at the moment, but there is a risk that they will land in stable channel with this design issue.
+
+## Related issues
+
+This issue is equivalent to similar variant theming issues and limitations concerning:
+
+- `FloatingActionButton` and its variants, see: https://github.com/flutter/flutter/issues/107946
+- `FilledButton` and `FilledButton.tonal`, see: https://github.com/flutter/flutter/issues/118063
+- `SnackBar`, see: https://github.com/flutter/flutter/issues/108539
+- `Chip`, see: https://github.com/flutter/flutter/issues/115827
+
+## Proposal
+
+A solution proposal applicable to all cases exists in this comment: https://github.com/flutter/flutter/issues/107946#issuecomment-1193422262
+
+
+## Issue sample code
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
 // NOTE:
 //
 // Copy the code for the issue sample to test here. It always only contains
@@ -28,7 +78,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// This issue reported here: https://github.com/flutter/flutter/issues/123829
+// This issue reported here: https://github.com/flutter/flutter/issues/123797
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
@@ -45,7 +95,7 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
 
   // The actual colors used doe not really matter, there is a lot not needed
   // complexity it tint and overlay calculations in this example. It is
@@ -62,42 +112,31 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
     visualDensity: VisualDensity.standard,
     iconButtonTheme: settings.useCustomTheme
         ? IconButtonThemeData(
-            style: ButtonStyle(
-            backgroundColor:
-                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return tintedDisable(colorScheme.onSurface, tint)
-                    .withAlpha(kAlphaVeryLowDisabled);
-              }
+        style: ButtonStyle(
+          backgroundColor:
+          MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.disabled)) {
+              return tintedDisable(colorScheme.onSurface, tint)
+                  .withAlpha(kAlphaVeryLowDisabled);
+            }
+            if (states.contains(MaterialState.selected)) {
+              return colorScheme.tertiaryContainer;
+            }
+            return Colors.transparent;
+          }),
+          foregroundColor:
+          MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.disabled)) {
+              return tintedDisable(colorScheme.onSurface, tint);
+            }
+            if (states.contains(MaterialState.selected)) {
+              return colorScheme.onTertiaryContainer;
+            }
+            return foreground;
+          }),
+          overlayColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
-                return colorScheme.tertiaryContainer;
-              }
-              return Colors.transparent;
-            }),
-            foregroundColor:
-                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return tintedDisable(colorScheme.onSurface, tint);
-              }
-              if (states.contains(MaterialState.selected)) {
-                return colorScheme.onTertiaryContainer;
-              }
-              return foreground;
-            }),
-            overlayColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
-                  if (states.contains(MaterialState.pressed)) {
-                    return tintedPressed(overlay, tint, factor);
-                  }
-                  if (states.contains(MaterialState.hovered)) {
-                    return tintedHovered(overlay, tint, factor);
-                  }
-                  if (states.contains(MaterialState.focused)) {
-                    return tintedFocused(overlay, tint, factor);
-                  }
-                  return Colors.transparent;
-                }
                 if (states.contains(MaterialState.pressed)) {
                   return tintedPressed(overlay, tint, factor);
                 }
@@ -108,9 +147,20 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
                   return tintedFocused(overlay, tint, factor);
                 }
                 return Colors.transparent;
-              },
-            ),
-          ))
+              }
+              if (states.contains(MaterialState.pressed)) {
+                return tintedPressed(overlay, tint, factor);
+              }
+              if (states.contains(MaterialState.hovered)) {
+                return tintedHovered(overlay, tint, factor);
+              }
+              if (states.contains(MaterialState.focused)) {
+                return tintedFocused(overlay, tint, factor);
+              }
+              return Colors.transparent;
+            },
+          ),
+        ))
         : null,
   );
 }
@@ -333,10 +383,10 @@ class _IconM3ToggleButtonState extends State<_IconM3ToggleButton> {
   Widget build(BuildContext context) {
     final VoidCallback? onPressed = widget.isEnabled
         ? () {
-            setState(() {
-              selected = !selected;
-            });
-          }
+      setState(() {
+        selected = !selected;
+      });
+    }
         : null;
 
     switch (widget.variant) {
@@ -428,9 +478,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomTheme.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    useCustomTheme.hashCode,
+  ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
@@ -755,7 +805,7 @@ Color tintedFocused(Color overlay, Color tint, [double factor = 1]) {
 Color tintedDisable(Color overlay, Color tint) =>
 // Tint color alpha blend into overlay #66=40%
 // Opacity of result #61=38%, same as M3 opacity on disable.
-    overlay.blendAlpha(tint, kTintDisabled).withAlpha(kAlphaDisabled);
+overlay.blendAlpha(tint, kTintDisabled).withAlpha(kAlphaDisabled);
 
 extension ColorExtensions on Color {
   /// Blend in the given input Color with an alpha value.
@@ -794,19 +844,19 @@ double tintAlphaFactor(Color color, Brightness mode,
   if (mode == Brightness.light) {
     return surfaceMode
         ? ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? 1.5
-            : 4.0
+        ? 1.5
+        : 4.0
         : ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? 5.0
-            : 2.0;
+        ? 5.0
+        : 2.0;
   } else {
     return surfaceMode
         ? ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? 5.0
-            : 2.0
+        ? 5.0
+        : 2.0
         : ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? 5.0
-            : 4.0;
+        ? 5.0
+        : 4.0;
   }
 }
 
@@ -870,3 +920,70 @@ const int kAlphaDisabled = 0x61;
 ///
 /// Value: 0x1F = 31 = 12.16%
 const int kAlphaVeryLowDisabled = 0x1F;
+
+```
+
+</details>
+
+## Used Flutter version
+
+Channel master, 3.9.0-19.0.pre.50
+
+<details>
+  <summary>Flutter doctor</summary>
+
+```
+
+flutter doctor -v  
+[✓] Flutter (Channel master, 3.9.0-19.0.pre.50, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.9.0-19.0.pre.50 on channel master at /Users/rydmike/fvm/versions/master
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 4e1ad59f75 (23 hours ago), 2023-03-30 01:06:46 +0200
+    • Engine revision 45467e2a8b
+    • Dart version 3.0.0 (build 3.0.0-378.0.dev)
+    • DevTools version 2.22.2
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly to
+      perform update checks and upgrades.
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.2)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14C18
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+
+[✓] IntelliJ IDEA Community Edition (version 2023.1)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 72.1.5
+    • Dart plugin version 231.8109.91
+
+[✓] VS Code (version 1.76.2)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.60.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.2.1 22D68 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 111.0.5563.146
+
+[✓] Network resources
+    • All expected network resources are available.
+
+```
+
+</details>

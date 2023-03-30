@@ -13,5 +13,6 @@ The following issues have their reproduction code sample, and also the original 
  - (07) [DropdownMenu's menu overlay size issue](https://github.com/flutter/flutter/issues/123631)
  - (08) [DropdownMenu themed focused item broken](https://github.com/flutter/flutter/issues/123736)
  - (09) [DropdownMenu Keyboard Accessibility](https://github.com/flutter/flutter/issues/123797)
+ - (10) [IconButton theming destroys variant styles](https://github.com/flutter/flutter/issues/123829)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.
