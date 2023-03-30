@@ -127,9 +127,7 @@ Currently moving around with up/down, moves focus, and also **selects** the item
 
 With a mouse you can move the `hovered` state around, and click selects it. Typically, I would expect a similar pattern for keyboard based focus navigation, up/down moves focus around, selected stays wherever it is. Then enter/space selects focused item, not so that focus automatically also selects focused item.
 
-Now when you keyboard navigate the menu with focus traversal, and want to cancel your choice by exiting the menu (there is by the way no ESC key binding to do so), there is no way to do this so that menu selection would also reverts to its original state.
-
-You can click outside the menu, but that does not cancel your focus/select action as expected, the item you focused becomes the new selected menu choice also when you cancel the menu. It does not revert to what it had when you opened it. Using separate `selected` choice and state, could enable this kind of expected menu usage pattern.
+Now when you keyboard navigate the menu with focus traversal, and want to cancel your choice by exiting the menu (there is by the way no ESC key binding to do so), there is no way to do this so that menu selection would also revert to its original state. You can click outside the menu, but that does not cancel your focus/select action as expected. The item you focused becomes the new selected menu choice, also when you cancel the menu. It does not revert to what it had when you opened it. Using separate `selected` choice and state, could enable this kind of expected menu usage pattern.
 
 #### M3 guidance?
 
@@ -146,6 +144,9 @@ An experimental revised and fixed version of `_buildButtons(..)` function from f
 It may be useful as a starting point for an actual fix. It only patches the current implementation concerning it ignoring the theme. It does not address the discussion part above.
 
 This fix also has the same "hack" feel as the original implementation. It uses knowledge about what the M3 token defaults are for a default `focused` dropdown menu item, as its fallback defaults for the simulated none widget/themed defaults. It does so, since it cannot access the `_MenuButtonDefaultsM3` private class in `menu_anchor.dart`. This is not the first time I have run into a situation where it would be useful to have access to the theme default classes, outside their component class files.
+
+I checked the quick fix below with existing tests in `dropdown_menu_theme_test.dart` and `dropdown_test.dart`. It did not break any existing test in them. Existing tests do not capture this issue because they do not even include any customization of `DropdownMenu` via `MenuButtonThemeData`. The tests rely on that being covered by `MenuItemButton` related tests. Since `DropdownMenu` overrides `MenuItemButton` default behavior, it needs its own tests of those parts to ensure those overrides do not break expected theming features of used `MenuItemButton`.
+
 
 ```dart
 List<Widget> _buildButtons(
@@ -164,7 +165,7 @@ List<Widget> _buildButtons(
       effectivePadding = EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding);
   }
   final ThemeData theme = Theme.of(context);
-  final ButtonStyle defaultStyle = theme.menuButtonTheme?.style?.copyWith(padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(effectivePadding)) ?? MenuItemButton.styleFrom(padding: effectivePadding);
+  final ButtonStyle defaultStyle = theme.menuButtonTheme.style?.copyWith(padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(effectivePadding)) ?? MenuItemButton.styleFrom(padding: effectivePadding);
 
   for (int i = 0; i < filteredEntries.length; i++) {
     final DropdownMenuEntry<T> entry = filteredEntries[i];
