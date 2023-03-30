@@ -1,89 +1,213 @@
-## DropdownMenu selected item does not use MaterialState.selected.
+## DropdownMenu themed focused item broken
 
-The style indication of the found and selected item in a `DropdownMenu` does not use `MaterialState.selected`. Its style is hard coded.
+The style indication of the found and focused/selected item in a `DropdownMenu` does not use `MenuButtonThemeData`. Its simulation of the focused state omits the theme.
 
-This makes it impossible to provide a style/themed consistent style for the selected item when using a custom theme or widget properties in a `DropdownMenu`. One does have to live with the default style only for entire menu, or accept a deviant and out of style looking selected item. 
-
+This makes it impossible to provide a consistent style for the focused/selected item when using a custom theme in a `DropdownMenu`. One have to live with the default style for the entire menu, or accept a deviant and out of style looking focused/selected item.
 
 ## Expected results
 
-Expected to be able to style the found select item in a `DropdownMenu` to a style where the selected item would match the style of used custom, and also do so on hover/focus/pressed.
+Expect to be able to theme the found selected item in a `DropdownMenu` to a style where the selected item would match the style of used custom theme, and do so on all hover/focus/pressed themed MaterialState dependent colors.
+
+Consider these on purpose wild looking `MenuThemeData` and `MenuButtonThemeData`, used to visually highlight the functional gaps.
+
+<details>
+  <summary>Theme snippet</summary>
+
+(For full code sample, see the **Issue sample code** further below).
+
+```dart
+  MenuThemeData(
+    style: MenuStyle(
+      backgroundColor: MaterialStatePropertyAll<Color?>(colorScheme.errorContainer),
+      padding: const MaterialStatePropertyAll<EdgeInsetsGeometry?>(EdgeInsets.all(8)),
+    ),
+  ),
+  MenuButtonThemeData(
+    style: ButtonStyle(
+      backgroundColor: MaterialStateProperty.resolveWith(
+          (Set<MaterialState> states) {
+        if (states.contains(MaterialState.pressed)) {
+          return colorScheme.primary;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return colorScheme.primary;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return colorScheme.primaryContainer;
+        }
+        return Colors.transparent;
+      }),
+      foregroundColor: MaterialStateProperty.resolveWith(
+          (Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return colorScheme.onSurface.withOpacity(0.38);
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return colorScheme.onPrimary;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return colorScheme.onPrimary;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return colorScheme.onPrimaryContainer;
+        }
+        return colorScheme.onSurface;
+      }),
+      iconColor: MaterialStateProperty.resolveWith(
+          (Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return colorScheme.onSurface.withOpacity(0.38);
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return colorScheme.onPrimary;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return colorScheme.onPrimary;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return colorScheme.onPrimaryContainer;
+        }
+        return colorScheme.onSurfaceVariant;
+      }),
+      overlayColor: MaterialStateProperty.resolveWith(
+          (Set<MaterialState> states) {
+        if (states.contains(MaterialState.pressed)) {
+          return colorScheme.onPrimary.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return colorScheme.onPrimary.withOpacity(0.08);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return colorScheme.onPrimaryContainer.withOpacity(0.12);
+        }
+        return Colors.transparent;
+      }),
+      shape: ButtonStyleButton.allOrNull<OutlinedBorder>(
+        const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(10),
+          ),
+        ),
+      ),
+    ),
+  ),
+```
+
+</details>
+
+Expect the theme to use above defined MenuButtonThemeData `ButtonStyle` theming and look and behave as shown below:
+
+![Screenshot 2023-03-30 at 1 12 28](https://user-images.githubusercontent.com/39990307/228695749-89395f80-20c6-4d4a-ab48-81b23d2c5bec.png)
+
+
+https://user-images.githubusercontent.com/39990307/228695784-c44ba365-0174-44a7-8d67-d07a727aef44.mov
 
 ## Actual results
 
-Get a hard coded style of selected item that does not fit with other possible styling capabilities offered by the `DropdownMenu`.  
+Get a style where the **focused** (and selected) item has a style that does not used the themed style, it effectively ignores the theme defined by the `MenuButtonThemeData` theme, concerning its `focused` states for all theme colors.
 
-## Proposal
+![Screenshot 2023-03-30 at 2 09 44](https://user-images.githubusercontent.com/39990307/228695835-f474b528-bd89-435b-9c86-ca80095fa346.png)
 
-Maybe consider using the `MaterialState.selected` state for found item and thus enable customizing it using the already available theme and features of used underlying `ButtonStyleButton``
 
-### Fixed version for expected result
+https://user-images.githubusercontent.com/39990307/228695848-fa1c1675-ff88-483d-9c05-c3b15666ae14.mov
 
-An experimental and revised plus fixed version of `_buildButtons(..)` function from file `dropdown_menu.dart` used to generate the expected result is included for references below.
+## Discussion
 
-It can be used as starting point for an actual fix.
+Maybe consider using the `MaterialState.selected` state for the found item and thus enable customizing it using the already available theme and features of used underlying `ButtonStyleButton`.
 
+### Accessibility Improvements
+
+The `DropdownMenu` implementation could perhaps also improve its keyboard accessibility support by using `MaterialState.selected` as the state and style utilized to indicate the found and selected item, with no need to simulate (as its code comment describes it) a focus for the selected item.
+
+This also opens the possibility to style the selected item differently.
+
+It would also imply a slightly different keyboard navigation usage pattern than currently used, one that is commonly associated with keyboard accessibility/usability. Moving up/down with keyboard would if `selected` is also utilized, only move the `focus` around in the menu, with its own `focus` style. Hitting enter/space would then **select** the item.
+
+Currently moving around with up/down, moves focus, and also **selects** the item directly. There is no keyboard navigation for only moving focus around, focused item is always selected.
+
+With a mouse you can move the `hovered` state around, and click selects it. Typically, I would expect a similar pattern for keyboard based focus navigation, up/down moves focus around, selected stays wherever it is. Then enter/space selects focused item, not so that focus automatically also selects focused item.
+
+Now when you keyboard navigate the menu with focus traversal, and want to cancel your choice by exiting the menu (there is by the way no ESC key binding to do so), there is no way to do this so that menu selection would also reverts to its original state.
+
+You can click outside the menu, but that does not cancel your focus/select action as expected, the item you focused becomes the new selected menu choice also when you cancel the menu. It does not revert to what it had when you opened it. Using separate `selected` choice and state, could enable this kind of expected menu usage pattern.
+
+#### M3 guidance?
+
+The M3 guide is a bit vague on the finer points of how the dropdown keyboard navigation should work. It does state that up/down focuses an item, that space/enter selects the item. It does not say that focus equals selection, without actually hitting spec/enter selection key. See Menu [accessibility section](https://m3.material.io/components/menus/accessibility#0589f3a9-11ff-4129-bcaf-5cc666b890f5).
+
+#### No ESC key binding
+
+Maybe also consider adding an `ESC` key binding to dismiss the open menu. The `MenuAnchor` and `MenuBar` menus have it by default without adding it.
+
+## Fix used to demo expected result
+
+An experimental revised and fixed version of `_buildButtons(..)` function from file `dropdown_menu.dart`, used to generate the expected result above is included below for reference.
+
+It may be useful as a starting point for an actual fix. It only patches the current implementation concerning it ignoring the theme. It does not address the discussion part above.
+
+This fix also has the same "hack" feel as the original implementation. It uses knowledge about what the M3 token defaults are for a default `focused` dropdown menu item, as its fallback defaults for the simulated none widget/themed defaults. It does so, since it cannot access the `_MenuButtonDefaultsM3` private class in `menu_anchor.dart`. This is not the first time I have run into a situation where it would be useful to have access to the theme default classes, outside their component class files.
 
 ```dart
-  List<Widget> _buildButtons(
-    List<DropdownMenuEntry<T>> filteredEntries,
-    TextEditingController textEditingController,
-    TextDirection textDirection,
-    { int? focusedIndex }
-  ) {
-    final List<Widget> result = <Widget>[];
-    final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
-    final EdgeInsetsGeometry effectivePadding;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        effectivePadding = EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding);
-      case TextDirection.ltr:
-        effectivePadding = EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding);
-    }
-    final ThemeData theme = Theme.of(context);
-    for (int i = 0; i < filteredEntries.length; i++) {
-      final DropdownMenuEntry<T> entry = filteredEntries[i];
-      ButtonStyle effectiveStyle = entry.style ?? theme.menuButtonTheme?.style?.copyWith(padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(effectivePadding)) ?? MenuItemButton.styleFrom(padding: effectivePadding);
-      final Color focusedBackgroundColor = effectiveStyle.backgroundColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withOpacity(0.12);
-      final Color focusedForegroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface;
-      final Color focusedIconColor = effectiveStyle.iconColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurfaceVariant;
-      final Color focusedOverlayColor = effectiveStyle.overlayColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withOpacity(0.12);
-
-      // Simulate the focused state because the text field should always be focused
-      // during traversal. Include potential MenuItemButton theme in the focus
-      // simulation for all colors on the MenuItemButton.
-      effectiveStyle = entry.enabled && i == focusedIndex
-        ? effectiveStyle.copyWith(
-            backgroundColor: MaterialStatePropertyAll<Color>(focusedBackgroundColor),
-            foregroundColor: MaterialStatePropertyAll<Color>(focusedForegroundColor),
-            iconColor: MaterialStatePropertyAll<Color>(focusedIconColor),
-            overlayColor: MaterialStatePropertyAll<Color>(focusedOverlayColor),
-          )
-        : effectiveStyle;
-
-      final MenuItemButton menuItemButton = MenuItemButton(
-        style: effectiveStyle,
-        leadingIcon: entry.leadingIcon,
-        trailingIcon: entry.trailingIcon,
-        onPressed: entry.enabled
-          ? () {
-              textEditingController.text = entry.label;
-              textEditingController.selection =
-                TextSelection.collapsed(offset: textEditingController.text.length);
-              currentHighlight = widget.enableSearch ? i : null;
-              widget.onSelected?.call(entry.value);
-            }
-          : null,
-        requestFocusOnHover: false,
-        child: Text(entry.label),
-      );
-      result.add(menuItemButton);
-    }
-
-    return result;
+List<Widget> _buildButtons(
+  List<DropdownMenuEntry<T>> filteredEntries,
+  TextEditingController textEditingController,
+  TextDirection textDirection,
+  { int? focusedIndex }
+) {
+  final List<Widget> result = <Widget>[];
+  final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
+  final EdgeInsetsGeometry effectivePadding;
+  switch (textDirection) {
+    case TextDirection.rtl:
+      effectivePadding = EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding);
+    case TextDirection.ltr:
+      effectivePadding = EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding);
   }
-```
+  final ThemeData theme = Theme.of(context);
+  final ButtonStyle defaultStyle = theme.menuButtonTheme?.style?.copyWith(padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(effectivePadding)) ?? MenuItemButton.styleFrom(padding: effectivePadding);
 
+  for (int i = 0; i < filteredEntries.length; i++) {
+    final DropdownMenuEntry<T> entry = filteredEntries[i];
+    ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
+    final Color focusedBackgroundColor = effectiveStyle.backgroundColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withOpacity(0.12);
+    final Color focusedForegroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface;
+    final Color focusedIconColor = effectiveStyle.iconColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurfaceVariant;
+    final Color focusedOverlayColor = effectiveStyle.overlayColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withOpacity(0.12);
+
+    // Simulate the focused state because the text field should always be focused
+    // during traversal. Include potential MenuItemButton theme in the focus
+    // simulation for all colors in the theme.
+    effectiveStyle = entry.enabled && i == focusedIndex
+      ? effectiveStyle.copyWith(
+          backgroundColor: MaterialStatePropertyAll<Color>(focusedBackgroundColor),
+          foregroundColor: MaterialStatePropertyAll<Color>(focusedForegroundColor),
+          iconColor: MaterialStatePropertyAll<Color>(focusedIconColor),
+          overlayColor: MaterialStatePropertyAll<Color>(focusedOverlayColor),
+       )
+     : effectiveStyle;
+
+    final MenuItemButton menuItemButton = MenuItemButton(
+      style: effectiveStyle,
+      leadingIcon: entry.leadingIcon,
+      trailingIcon: entry.trailingIcon,
+      onPressed: entry.enabled
+        ? () {
+            textEditingController.text = entry.label;
+            textEditingController.selection = TextSelection.collapsed(offset: textEditingController.text.length);
+            currentHighlight = widget.enableSearch ? i : null;
+            widget.onSelected?.call(entry.value);
+          }
+        : null,
+      requestFocusOnHover: false,
+      child: Text(entry.label),
+    );
+    result.add(menuItemButton);
+  }
+
+  return result;
+}
+
+```
 
 ## Issue sample code
 
@@ -136,23 +260,33 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
+    menuTheme: settings.useCustomMenu
+        ? MenuThemeData(
+      style: MenuStyle(
+        backgroundColor:
+        MaterialStatePropertyAll<Color?>(colorScheme.errorContainer),
+        padding: const MaterialStatePropertyAll<EdgeInsetsGeometry?>(
+          EdgeInsets.all(8),
+        ),
+      ),
+    )
+        : null,
     menuButtonTheme: settings.useCustomMenu
         ? MenuButtonThemeData(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith(
-              (Set<MaterialState> states) {
-            if (states.contains(MaterialState.pressed)) {
-              return colorScheme.primary;
-            }
-            if (states.contains(MaterialState.hovered)) {
-              return colorScheme.primary;
-            }
-            if (states.contains(MaterialState.focused)) {
-              return colorScheme.primary;
-            }
-            return Colors.transparent;
-          },
-        ),
+                (Set<MaterialState> states) {
+              if (states.contains(MaterialState.pressed)) {
+                return colorScheme.primary;
+              }
+              if (states.contains(MaterialState.hovered)) {
+                return colorScheme.primary;
+              }
+              if (states.contains(MaterialState.focused)) {
+                return colorScheme.primaryContainer;
+              }
+              return Colors.transparent;
+            }),
         foregroundColor: MaterialStateProperty.resolveWith(
                 (Set<MaterialState> states) {
               if (states.contains(MaterialState.disabled)) {
@@ -165,7 +299,7 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
                 return colorScheme.onPrimary;
               }
               if (states.contains(MaterialState.focused)) {
-                return colorScheme.onPrimary;
+                return colorScheme.onPrimaryContainer;
               }
               return colorScheme.onSurface;
             }),
@@ -181,23 +315,29 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
                 return colorScheme.onPrimary;
               }
               if (states.contains(MaterialState.focused)) {
-                return colorScheme.onPrimary;
+                return colorScheme.onPrimaryContainer;
               }
               return colorScheme.onSurfaceVariant;
             }),
         overlayColor: MaterialStateProperty.resolveWith(
-              (Set<MaterialState> states) {
-            if (states.contains(MaterialState.pressed)) {
-              return colorScheme.onPrimary.withOpacity(0.12);
-            }
-            if (states.contains(MaterialState.hovered)) {
-              return colorScheme.onPrimary.withOpacity(0.08);
-            }
-            if (states.contains(MaterialState.focused)) {
-              return colorScheme.onPrimary.withOpacity(0.12);
-            }
-            return Colors.transparent;
-          },
+                (Set<MaterialState> states) {
+              if (states.contains(MaterialState.pressed)) {
+                return colorScheme.onPrimary.withOpacity(0.12);
+              }
+              if (states.contains(MaterialState.hovered)) {
+                return colorScheme.onPrimary.withOpacity(0.08);
+              }
+              if (states.contains(MaterialState.focused)) {
+                return colorScheme.onPrimaryContainer.withOpacity(0.12);
+              }
+              return Colors.transparent;
+            }),
+        shape: ButtonStyleButton.allOrNull<OutlinedBorder>(
+          const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
         ),
       ),
     )
@@ -236,7 +376,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('MenuButton Issue'),
+            title: const Text('DropdownMenu Issue'),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -315,30 +455,6 @@ class HomePage extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children: [
-        const SizedBox(height: 8),
-        const Text('Menu item text animates on hover/focus/press state change\n'
-            '\n'
-            'A menu highlight is not supposed to animate the text color '
-            'transition, nor does it on icons in the menu, only on text.\n'
-            '\n'
-            'With a default theme this issue cannot '
-            'be observed since text color is the same for hover/select/pressed '
-            'state, so it does not change. By making a themed menu version '
-            'where selected item uses a quite common primary colored menu '
-            'selection highlight, the menu text becomes reversed and the '
-            'issue can be observed.\n'
-            '\n'
-            'The DropdownMenu contains more icons and the odd combination of '
-            'text highlight animating while icons do not, can be observed more '
-            'easily.'
-            ''),
-        SwitchListTile(
-          title: const Text('Enable custom menu theme'),
-          value: settings.useCustomMenu,
-          onChanged: (bool value) {
-            onSettings(settings.copyWith(useCustomMenu: value));
-          },
-        ),
         SwitchListTile(
           title: const Text('Text directionality'),
           subtitle: const Text('OFF=LTR  ON=RTL'),
@@ -349,9 +465,17 @@ class HomePage extends StatelessWidget {
                 : onTextDirection(TextDirection.ltr);
           },
         ),
-        const Padding(
-          padding: EdgeInsets.all(12.0),
-          child: MenuBarShowcase(),
+        const SizedBox(height: 8),
+        const Text('DropdownMenu focused item style broken\n\n'
+            'The style indication of the found and selected item in a '
+            'DropdownMenu does not use MenuButtonThemeData. Its simulation of '
+            'the focused state omits the theme.'),
+        SwitchListTile(
+          title: const Text('Enable custom menu theme'),
+          value: settings.useCustomMenu,
+          onChanged: (bool value) {
+            onSettings(settings.copyWith(useCustomMenu: value));
+          },
         ),
         const Padding(
           padding: EdgeInsets.all(12.0),
@@ -359,123 +483,6 @@ class HomePage extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         const ShowColorSchemeColors(),
-      ],
-    );
-  }
-}
-
-class MenuBarShowcase extends StatelessWidget {
-  const MenuBarShowcase({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MenuBar(
-      children: <Widget>[
-        SubmenuButton(
-          menuChildren: <Widget>[
-            MenuItemButton(
-              onPressed: () {
-                showAboutDialog(
-                  context: context,
-                  useRootNavigator: false,
-                  applicationName: 'MenuBar Demo',
-                  applicationVersion: '1.0.0',
-                );
-              },
-              child: const MenuAcceleratorLabel('&About'),
-            ),
-            SubmenuButton(
-              menuChildren: <Widget>[
-                MenuItemButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Saved!'),
-                      ),
-                    );
-                  },
-                  child: const MenuAcceleratorLabel('&Save now'),
-                ),
-                MenuItemButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Load!'),
-                      ),
-                    );
-                  },
-                  child: const MenuAcceleratorLabel('&Load now'),
-                ),
-              ],
-              child: const Text('File'),
-            ),
-            MenuItemButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Quit!'),
-                  ),
-                );
-              },
-              child: const MenuAcceleratorLabel('&Quit'),
-            ),
-          ],
-          child: const MenuAcceleratorLabel('&File'),
-        ),
-        SubmenuButton(
-          menuChildren: <Widget>[
-            MenuItemButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Bold!'),
-                  ),
-                );
-              },
-              child: const MenuAcceleratorLabel('&Bold'),
-            ),
-            MenuItemButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Italic!'),
-                  ),
-                );
-              },
-              child: const MenuAcceleratorLabel('&Italic'),
-            ),
-            MenuItemButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Underline!'),
-                  ),
-                );
-              },
-              child: const MenuAcceleratorLabel('&Underline'),
-            ),
-          ],
-          child: const MenuAcceleratorLabel('&Style'),
-        ),
-        SubmenuButton(
-          menuChildren: <Widget>[
-            const MenuItemButton(
-              onPressed: null,
-              child: MenuAcceleratorLabel('&Disabled item'),
-            ),
-            MenuItemButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Minify!'),
-                  ),
-                );
-              },
-              child: const MenuAcceleratorLabel('Mi&nify'),
-            ),
-          ],
-          child: const MenuAcceleratorLabel('&View'),
-        ),
       ],
     );
   }
@@ -509,12 +516,6 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
               value: 'one',
             ),
             DropdownMenuEntry<String>(
-              label: 'Disabled settings',
-              leadingIcon: Icon(Icons.settings),
-              value: 'two',
-              enabled: false,
-            ),
-            DropdownMenuEntry<String>(
               label: 'Cabin overview',
               leadingIcon: Icon(Icons.cabin),
               value: 'three',
@@ -528,6 +529,12 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
               label: 'Water alert',
               leadingIcon: Icon(Icons.water_damage),
               value: 'five',
+            ),
+            DropdownMenuEntry<String>(
+              label: 'Disabled settings',
+              leadingIcon: Icon(Icons.settings),
+              value: 'two',
+              enabled: false,
             ),
           ],
         ),
@@ -873,7 +880,7 @@ class ColorCard extends StatelessWidget {
 
 ## Used Flutter version
 
-Channel master, 3.9.0-18.0.pre.39
+Channel master, 3.9.0-19.0.pre.50
 
 <details>
   <summary>Flutter doctor</summary>
@@ -881,15 +888,15 @@ Channel master, 3.9.0-18.0.pre.39
 ```
 
 flutter doctor -v          
-[✓] Flutter (Channel master, 3.9.0-18.0.pre.39, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
-    • Flutter version 3.9.0-18.0.pre.39 on channel master at /Users/rydmike/fvm/versions/master
+[✓] Flutter (Channel master, 3.9.0-19.0.pre.50, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.9.0-19.0.pre.50 on channel master at /Users/rydmike/fvm/versions/master
     • Upstream repository https://github.com/flutter/flutter.git
-    • Framework revision f528f9f56c (58 minutes ago), 2023-03-28 11:15:08 -0400
-    • Engine revision 0b1c7c8760
-    • Dart version 3.0.0 (build 3.0.0-375.0.dev)
+    • Framework revision 4e1ad59f75 (61 minutes ago), 2023-03-30 01:06:46 +0200
+    • Engine revision 45467e2a8b
+    • Dart version 3.0.0 (build 3.0.0-378.0.dev)
     • DevTools version 2.22.2
-    • If those were intentional, you can disregard the above warnings; however it is recommended
-      to use "git" directly to perform update checks and upgrades.
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly
+      to perform update checks and upgrades.
 
 [✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
     • Android SDK at /Users/rydmike/Library/Android/sdk
@@ -929,6 +936,7 @@ flutter doctor -v
 
 [✓] Network resources
     • All expected network resources are available.
+
 
 ```
 

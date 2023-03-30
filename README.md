@@ -4,12 +4,13 @@ This is a small repo to collect and make it easier to report multiple Flutter is
 
 The following issues have their reproduction code sample, and also the original markdown issue report text in this repository. 
 
- - https://github.com/flutter/flutter/issues/123292 (01)
- - https://github.com/flutter/flutter/issues/123308 (02)
- - https://github.com/flutter/flutter/issues/123324 (03)
- - https://github.com/flutter/flutter/issues/123380 (04)
- - https://github.com/flutter/flutter/issues/123507 (05) ☂️ Contains 6 issues
- - https://github.com/flutter/flutter/issues/123615 (06)
- - https://github.com/flutter/flutter/issues/123631 (07)
+ - (01) [SegmentedButton segments background cannot be made transparent](https://github.com/flutter/flutter/issues/123292)
+ - (02) [SegmentedButton sets its MaterialState incorrectly set for its overlayColor](https://github.com/flutter/flutter/issues/123308)
+ - (03) [NavigationDrawer indicator overlay does not use shape](https://github.com/flutter/flutter/issues/123324)
+ - (04) [NavigationDrawer has wrong width](https://github.com/flutter/flutter/issues/123380)
+ - (05) [NavigationDrawer Issues](https://github.com/flutter/flutter/issues/123507) ☂️ Contains 6 issues
+ - (06) [Menu button text animates on hover/focus/press state](https://github.com/flutter/flutter/issues/123615)
+ - (07) [DropdownMenu's menu overlay size issue](https://github.com/flutter/flutter/issues/123631)
+ - (08) [DropdownMenu themed focused item broken](https://github.com/flutter/flutter/issues/123736)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.

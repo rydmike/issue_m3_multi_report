@@ -27,8 +27,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// This issue reported here: https://github.com/flutter/flutter/issues/123615
-
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
 // Make M3 ColorSchemes from a seed color.
@@ -55,7 +53,8 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
               backgroundColor:
                   MaterialStatePropertyAll<Color?>(colorScheme.errorContainer),
               padding: const MaterialStatePropertyAll<EdgeInsetsGeometry?>(
-                  EdgeInsets.all(8)),
+                EdgeInsets.all(8),
+              ),
             ),
           )
         : null,
@@ -63,19 +62,18 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
         ? MenuButtonThemeData(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.resolveWith(
-                (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed)) {
-                    return colorScheme.primary;
-                  }
-                  if (states.contains(MaterialState.hovered)) {
-                    return colorScheme.primary;
-                  }
-                  if (states.contains(MaterialState.focused)) {
-                    return colorScheme.primaryContainer;
-                  }
-                  return Colors.transparent;
-                },
-              ),
+                  (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return colorScheme.primary;
+                }
+                if (states.contains(MaterialState.hovered)) {
+                  return colorScheme.primary;
+                }
+                if (states.contains(MaterialState.focused)) {
+                  return colorScheme.primaryContainer;
+                }
+                return Colors.transparent;
+              }),
               foregroundColor: MaterialStateProperty.resolveWith(
                   (Set<MaterialState> states) {
                 if (states.contains(MaterialState.disabled)) {
@@ -109,38 +107,18 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
                 return colorScheme.onSurfaceVariant;
               }),
               overlayColor: MaterialStateProperty.resolveWith(
-                (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed)) {
-                    if (states.contains(MaterialState.focused)) {
-                      debugPrint('Overlay focused pressed');
-                      return colorScheme.onPrimaryContainer.withOpacity(0.12);
-                    }
-                  }
-                  if (states.contains(MaterialState.hovered)) {
-                    if (states.contains(MaterialState.focused)) {
-                      debugPrint('Overlay focused hovered');
-                      return colorScheme.onPrimaryContainer.withOpacity(0.08);
-                    }
-                  }
-                  // if (states.contains(MaterialState.focused)) {
-                  //   debugPrint('Overlay focused');
-                  //   return colorScheme.onPrimaryContainer.withOpacity(0.12);
-                  // }
-                  if (states.contains(MaterialState.pressed)) {
-                    debugPrint('Overlay ONLY pressed');
-                    return colorScheme.onPrimary.withOpacity(0.12);
-                  }
-                  if (states.contains(MaterialState.hovered)) {
-                    debugPrint('Overlay ONLY hovered');
-                    return colorScheme.onPrimary.withOpacity(0.08);
-                  }
-                  if (states.contains(MaterialState.focused)) {
-                    debugPrint('Overlay ONLY focused');
-                    return colorScheme.onPrimary.withOpacity(0.12);
-                  }
-                  return Colors.transparent;
-                },
-              ),
+                  (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return colorScheme.onPrimary.withOpacity(0.12);
+                }
+                if (states.contains(MaterialState.hovered)) {
+                  return colorScheme.onPrimary.withOpacity(0.08);
+                }
+                if (states.contains(MaterialState.focused)) {
+                  return colorScheme.onPrimaryContainer.withOpacity(0.12);
+                }
+                return Colors.transparent;
+              }),
               shape: ButtonStyleButton.allOrNull<OutlinedBorder>(
                 const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(
@@ -264,18 +242,6 @@ class HomePage extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children: [
-        const SizedBox(height: 8),
-        const Text('DropdownMenu no MaterialState.selected\n\n'
-            'The style indication of the found and selected item in a '
-            'DropdownMenu does not use MaterialState.selected. '
-            'Its style is hard coded.'),
-        SwitchListTile(
-          title: const Text('Enable custom menu theme'),
-          value: settings.useCustomMenu,
-          onChanged: (bool value) {
-            onSettings(settings.copyWith(useCustomMenu: value));
-          },
-        ),
         SwitchListTile(
           title: const Text('Text directionality'),
           subtitle: const Text('OFF=LTR  ON=RTL'),
@@ -284,6 +250,18 @@ class HomePage extends StatelessWidget {
             value
                 ? onTextDirection(TextDirection.rtl)
                 : onTextDirection(TextDirection.ltr);
+          },
+        ),
+        const SizedBox(height: 8),
+        const Text('DropdownMenu focused item style broken\n\n'
+            'The style indication of the found and selected item in a '
+            'DropdownMenu does not use MenuButtonThemeData. Its simulation of '
+            'the focused state omits the theme.'),
+        SwitchListTile(
+          title: const Text('Enable custom menu theme'),
+          value: settings.useCustomMenu,
+          onChanged: (bool value) {
+            onSettings(settings.copyWith(useCustomMenu: value));
           },
         ),
         const Padding(
