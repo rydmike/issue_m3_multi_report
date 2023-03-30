@@ -113,29 +113,8 @@ https://user-images.githubusercontent.com/39990307/228695848-fa1c1675-ff88-483d-
 
 ## Discussion
 
-Maybe consider using the `MaterialState.selected` state for the found item and thus enable customizing it using the already available theme and features of used underlying `ButtonStyleButton`.
+**EDIT:** The accessibility topic found during creation of this issues and included in this discussion topic previously, have on request been moved to its own issues, see https://github.com/flutter/flutter/issues/123797.
 
-### Accessibility Improvements
-
-The `DropdownMenu` implementation could perhaps also improve its keyboard accessibility support by using `MaterialState.selected` as the state and style utilized to indicate the found and selected item, with no need to simulate (as its code comment describes it) a focus for the selected item.
-
-This also opens the possibility to style the selected item differently.
-
-It would also imply a slightly different keyboard navigation usage pattern than currently used, one that is commonly associated with keyboard accessibility/usability. Moving up/down with keyboard would if `selected` is also utilized, only move the `focus` around in the menu, with its own `focus` style. Hitting enter/space would then **select** the item.
-
-Currently moving around with up/down, moves focus, and also **selects** the item directly. There is no keyboard navigation for only moving focus around, focused item is always selected.
-
-With a mouse you can move the `hovered` state around, and click selects it. Typically, I would expect a similar pattern for keyboard based focus navigation, up/down moves focus around, selected stays wherever it is. Then enter/space selects focused item, not so that focus automatically also selects focused item.
-
-Now when you keyboard navigate the menu with focus traversal, and want to cancel your choice by exiting the menu (there is by the way no ESC key binding to do so), there is no way to do this so that menu selection would also revert to its original state. You can click outside the menu, but that does not cancel your focus/select action as expected. The item you focused becomes the new selected menu choice, also when you cancel the menu. It does not revert to what it had when you opened it. Using separate `selected` choice and state, could enable this kind of expected menu usage pattern.
-
-#### M3 guidance?
-
-The M3 guide is a bit vague on the finer points of how the dropdown keyboard navigation should work. It does state that up/down focuses an item, that space/enter selects the item. It does not say that focus equals selection, without actually hitting spec/enter selection key. See Menu [accessibility section](https://m3.material.io/components/menus/accessibility#0589f3a9-11ff-4129-bcaf-5cc666b890f5).
-
-#### No ESC key binding
-
-Maybe also consider adding an `ESC` key binding to dismiss the open menu. The `MenuAnchor` and `MenuBar` menus have it by default without adding it.
 
 ## Fix used to demo expected result
 
@@ -256,92 +235,92 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-  mode == ThemeMode.light ? schemeLight : schemeDark;
+      mode == ThemeMode.light ? schemeLight : schemeDark;
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
     menuTheme: settings.useCustomMenu
         ? MenuThemeData(
-      style: MenuStyle(
-        backgroundColor:
-        MaterialStatePropertyAll<Color?>(colorScheme.errorContainer),
-        padding: const MaterialStatePropertyAll<EdgeInsetsGeometry?>(
-          EdgeInsets.all(8),
-        ),
-      ),
-    )
+            style: MenuStyle(
+              backgroundColor:
+                  MaterialStatePropertyAll<Color?>(colorScheme.errorContainer),
+              padding: const MaterialStatePropertyAll<EdgeInsetsGeometry?>(
+                EdgeInsets.all(8),
+              ),
+            ),
+          )
         : null,
     menuButtonTheme: settings.useCustomMenu
         ? MenuButtonThemeData(
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
-                return colorScheme.primary;
-              }
-              if (states.contains(MaterialState.hovered)) {
-                return colorScheme.primary;
-              }
-              if (states.contains(MaterialState.focused)) {
-                return colorScheme.primaryContainer;
-              }
-              return Colors.transparent;
-            }),
-        foregroundColor: MaterialStateProperty.resolveWith(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return colorScheme.onSurface.withOpacity(0.38);
-              }
-              if (states.contains(MaterialState.pressed)) {
-                return colorScheme.onPrimary;
-              }
-              if (states.contains(MaterialState.hovered)) {
-                return colorScheme.onPrimary;
-              }
-              if (states.contains(MaterialState.focused)) {
-                return colorScheme.onPrimaryContainer;
-              }
-              return colorScheme.onSurface;
-            }),
-        iconColor: MaterialStateProperty.resolveWith(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return colorScheme.onSurface.withOpacity(0.38);
-              }
-              if (states.contains(MaterialState.pressed)) {
-                return colorScheme.onPrimary;
-              }
-              if (states.contains(MaterialState.hovered)) {
-                return colorScheme.onPrimary;
-              }
-              if (states.contains(MaterialState.focused)) {
-                return colorScheme.onPrimaryContainer;
-              }
-              return colorScheme.onSurfaceVariant;
-            }),
-        overlayColor: MaterialStateProperty.resolveWith(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
-                return colorScheme.onPrimary.withOpacity(0.12);
-              }
-              if (states.contains(MaterialState.hovered)) {
-                return colorScheme.onPrimary.withOpacity(0.08);
-              }
-              if (states.contains(MaterialState.focused)) {
-                return colorScheme.onPrimaryContainer.withOpacity(0.12);
-              }
-              return Colors.transparent;
-            }),
-        shape: ButtonStyleButton.allOrNull<OutlinedBorder>(
-          const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(10),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return colorScheme.primary;
+                }
+                if (states.contains(MaterialState.hovered)) {
+                  return colorScheme.primary;
+                }
+                if (states.contains(MaterialState.focused)) {
+                  return colorScheme.primaryContainer;
+                }
+                return Colors.transparent;
+              }),
+              foregroundColor: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
+                if (states.contains(MaterialState.disabled)) {
+                  return colorScheme.onSurface.withOpacity(0.38);
+                }
+                if (states.contains(MaterialState.pressed)) {
+                  return colorScheme.onPrimary;
+                }
+                if (states.contains(MaterialState.hovered)) {
+                  return colorScheme.onPrimary;
+                }
+                if (states.contains(MaterialState.focused)) {
+                  return colorScheme.onPrimaryContainer;
+                }
+                return colorScheme.onSurface;
+              }),
+              iconColor: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
+                if (states.contains(MaterialState.disabled)) {
+                  return colorScheme.onSurface.withOpacity(0.38);
+                }
+                if (states.contains(MaterialState.pressed)) {
+                  return colorScheme.onPrimary;
+                }
+                if (states.contains(MaterialState.hovered)) {
+                  return colorScheme.onPrimary;
+                }
+                if (states.contains(MaterialState.focused)) {
+                  return colorScheme.onPrimaryContainer;
+                }
+                return colorScheme.onSurfaceVariant;
+              }),
+              overlayColor: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return colorScheme.onPrimary.withOpacity(0.12);
+                }
+                if (states.contains(MaterialState.hovered)) {
+                  return colorScheme.onPrimary.withOpacity(0.08);
+                }
+                if (states.contains(MaterialState.focused)) {
+                  return colorScheme.onPrimaryContainer.withOpacity(0.12);
+                }
+                return Colors.transparent;
+              }),
+              shape: ButtonStyleButton.allOrNull<OutlinedBorder>(
+                const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    )
+          )
         : null,
   );
 }
@@ -588,9 +567,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-    useMaterial3.hashCode,
-    useCustomMenu.hashCode,
-  ]);
+        useMaterial3.hashCode,
+        useCustomMenu.hashCode,
+      ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
@@ -942,3 +921,13 @@ flutter doctor -v
 ```
 
 </details>
+
+## Other Issues Related to DropdownMenu and Menus
+
+- [ ] https://github.com/flutter/flutter/issues/123615
+- [ ] https://github.com/flutter/flutter/issues/123631
+- [ ] https://github.com/flutter/flutter/issues/123797
+- [ ] https://github.com/flutter/flutter/issues/123395
+- [ ] https://github.com/flutter/flutter/issues/120567
+- [ ] https://github.com/flutter/flutter/issues/120349
+- [ ] https://github.com/flutter/flutter/issues/119743

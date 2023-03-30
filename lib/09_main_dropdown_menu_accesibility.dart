@@ -19,7 +19,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -28,7 +28,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// This issue reported here: https://github.com/flutter/flutter/issues/123631
+// This issue reported here: https://github.com/flutter/flutter/issues/123797
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
@@ -50,6 +50,82 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
+    menuTheme: const MenuThemeData(
+      style: MenuStyle(
+        padding: MaterialStatePropertyAll<EdgeInsetsGeometry?>(
+          EdgeInsets.all(8),
+        ),
+      ),
+    ),
+    menuButtonTheme: MenuButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor:
+            MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.pressed)) {
+            return colorScheme.primary;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.primary;
+          }
+          if (states.contains(MaterialState.focused)) {
+            return colorScheme.primaryContainer;
+          }
+          return Colors.transparent;
+        }),
+        foregroundColor:
+            MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return colorScheme.onSurface.withOpacity(0.38);
+          }
+          if (states.contains(MaterialState.pressed)) {
+            return colorScheme.onPrimary;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.onPrimary;
+          }
+          if (states.contains(MaterialState.focused)) {
+            return colorScheme.onPrimaryContainer;
+          }
+          return colorScheme.onSurface;
+        }),
+        iconColor:
+            MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return colorScheme.onSurface.withOpacity(0.38);
+          }
+          if (states.contains(MaterialState.pressed)) {
+            return colorScheme.onPrimary;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.onPrimary;
+          }
+          if (states.contains(MaterialState.focused)) {
+            return colorScheme.onPrimaryContainer;
+          }
+          return colorScheme.onSurfaceVariant;
+        }),
+        overlayColor:
+            MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.pressed)) {
+            return colorScheme.onPrimary.withOpacity(0.12);
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.onPrimary.withOpacity(0.08);
+          }
+          if (states.contains(MaterialState.focused)) {
+            return colorScheme.onPrimaryContainer.withOpacity(0.12);
+          }
+          return Colors.transparent;
+        }),
+        shape: ButtonStyleButton.allOrNull<OutlinedBorder>(
+          const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }
 
@@ -84,7 +160,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('DropdownMenu Issue'),
+            title: const Text('DropdownMenu Keyboard Accessibility'),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -140,49 +216,33 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Text('DropdownMenu overlay width in ListView fills width of '
-              'viewport. Same issue not seen with menu overlay when used from '
-              'a MenuBar or MenuAnchor in a ListView.'),
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      children: const <Widget>[
+        SizedBox(height: 8),
+        Text('DropdownMenu equals keyboard focus with selection, '
+            'this prevents navigating the menu without committing a '
+            'selection as well as dismissing the menu and expecting '
+            'the state menu selection had when it was opened to be '
+            'reset without any selection made. '),
+        SizedBox(height: 8),
+        Text('FAIL:\n'
+            '- DropdownMenu keyboard focus is same as selecting an item\n'
+            '- DropdownMenu no has no ESC key to dismiss binding'),
+        SizedBox(height: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [DropDownMenuShowcase()],
         ),
-        const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Text('OK: DropdownMenu overlay width in a Column'),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: DropDownMenuShowcase(),
-        ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: const <Widget>[
-              SizedBox(height: 16),
-              Text('FAIL: DropdownMenu overlay width in ListView'),
-              DropDownMenuShowcase(),
-              SizedBox(height: 16),
-              Text('OK: DropdownMenu overlay width in ListView '
-                  'wrapped with Column'),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [DropDownMenuShowcase()],
-              ),
-              SizedBox(height: 16),
-              Text('OK: Other Menus and their overlays in a ListView'),
-              MenuBarShowcase(),
-              SizedBox(height: 16),
-              MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
-              SizedBox(height: 16),
-              ShowColorSchemeColors(),
-            ],
-          ),
-        ),
+        SizedBox(height: 16),
+        Text('OK:\n'
+            'MenuBar and MenuAnchor have ESC dismiss key binding'),
+        SizedBox(height: 8),
+        MenuBarShowcase(),
+        SizedBox(height: 16),
+        MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
+        SizedBox(height: 16),
+        ShowColorSchemeColors(),
       ],
     );
   }
@@ -213,12 +273,6 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
           value: 'one',
         ),
         DropdownMenuEntry<String>(
-          label: 'Disabled settings',
-          leadingIcon: Icon(Icons.settings),
-          value: 'two',
-          enabled: false,
-        ),
-        DropdownMenuEntry<String>(
           label: 'Cabin overview',
           leadingIcon: Icon(Icons.cabin),
           value: 'three',
@@ -232,6 +286,12 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
           label: 'Water alert',
           leadingIcon: Icon(Icons.water_damage),
           value: 'five',
+        ),
+        DropdownMenuEntry<String>(
+          label: 'Disabled settings',
+          leadingIcon: Icon(Icons.settings),
+          value: 'two',
+          enabled: false,
         ),
       ],
     );

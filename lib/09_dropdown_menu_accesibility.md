@@ -1,8 +1,61 @@
-// NOTE:
-//
-// Copy the code for the issue sample to test here. It always only contains
-// the sample last looked at.
+## DropdownMenu Keyboard Accessibility
 
+For menu items the `DropdownMenu` equals keyboard focus with selection, this prevents navigating the menu without committing a selection, as well as dismissing the menu and expecting the state, the menu selection had when it was opened, to be reset without any selection being made.
+
+>**INFO**  
+> This issue was found when reporting issue https://github.com/flutter/flutter/issues/123736 and originally mentioned as a side note in its discussion. On request, it was extracted to its own issue report.
+
+
+## Expected results
+
+* Expect to be be able to navigate focus on `DropdownMenu` items with keyboard without changing its current selection.
+* Expect to change selection when space or enter is pressed.
+* Expect to be able to dismiss the open menu by clikcing outside it or hitting `ESC` key.
+
+## Actual results
+
+* Selected item is automatically selected to the `TextField` when focused via keyboard navigation. Hover does not select an item, until an item is clicked, the two patterns are different.
+* Menu is closed with space or enter, but item is already selected to `TextField` when that is done.
+* No `ESC` key binding to dismiss open menu.
+
+https://user-images.githubusercontent.com/39990307/228914615-488a19ef-40ac-4a49-b858-fd896edc3017.mov
+
+## Discussion
+
+Maybe consider using the `MaterialState.selected` state for the found item and thus enable customizing it using the already available theme and features of used underlying `ButtonStyleButton`.
+
+### Accessibility Improvements
+
+The `DropdownMenu` implementation could perhaps also improve its keyboard accessibility support by using `MaterialState.selected` as the state and style utilized to indicate the found and selected item, with no need to simulate (as its code comment describes it) a focus for the selected item.
+
+This also opens the possibility to style the selected item differently.
+
+It would also imply a slightly different keyboard navigation usage pattern than currently used, one that is commonly associated with keyboard accessibility/usability. Moving up/down with keyboard would if `selected` is also utilized, only move the `focus` around in the menu, with its optionally own `focus` style. Hitting enter/space would then **select** the item.
+
+Currently moving around with up/down, moves focus, and also **selects** the item directly. There is no keyboard navigation for only moving focus around, focused item is always selected.
+
+The current behaviour where keyboard focus immediately selects an item, could still be offered as configurable optional behavior. It could then still be used when so preferred.
+
+With a mouse you can move the `hovered` state around, and click selects it. Typically, I would expect a similar pattern for keyboard based focus navigation, up/down moves focus around, selected stays wherever it is. Then enter/space selects focused item, not so that focus automatically also selects focused item.
+
+Now when you keyboard navigate the menu with focus traversal, and want to cancel your choice by exiting the menu (there is by the way no ESC key binding to do so), there is no way to do this so that menu selection would also revert to its original state. You can click outside the menu, but that does not cancel your focus/select action as expected. The item you focused becomes the new selected menu choice, also when you cancel the menu. It does not revert to what it had when you opened it. Using separate `selected` choice and state, could enable this kind of expected menu usage pattern.
+
+#### M3 guidance?
+
+The M3 guide is a bit vague on the finer points of how the dropdown keyboard navigation should work. It does state that up/down focuses an item, that space/enter selects the item. It does not say that focus equals selection, without actually hitting spec/enter selection key. See Menu [accessibility section](https://m3.material.io/components/menus/accessibility#0589f3a9-11ff-4129-bcaf-5cc666b890f5).
+
+#### No ESC key binding
+
+Maybe also consider adding an `ESC` key binding to dismiss the open menu. The `MenuAnchor` and `MenuBar` menus have it by default without adding it.
+
+
+## Issue sample code
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -19,7 +72,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -45,11 +98,87 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
+    menuTheme: const MenuThemeData(
+      style: MenuStyle(
+        padding: MaterialStatePropertyAll<EdgeInsetsGeometry?>(
+          EdgeInsets.all(8),
+        ),
+      ),
+    ),
+    menuButtonTheme: MenuButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor:
+        MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.pressed)) {
+            return colorScheme.primary;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.primary;
+          }
+          if (states.contains(MaterialState.focused)) {
+            return colorScheme.primaryContainer;
+          }
+          return Colors.transparent;
+        }),
+        foregroundColor:
+        MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return colorScheme.onSurface.withOpacity(0.38);
+          }
+          if (states.contains(MaterialState.pressed)) {
+            return colorScheme.onPrimary;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.onPrimary;
+          }
+          if (states.contains(MaterialState.focused)) {
+            return colorScheme.onPrimaryContainer;
+          }
+          return colorScheme.onSurface;
+        }),
+        iconColor:
+        MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return colorScheme.onSurface.withOpacity(0.38);
+          }
+          if (states.contains(MaterialState.pressed)) {
+            return colorScheme.onPrimary;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.onPrimary;
+          }
+          if (states.contains(MaterialState.focused)) {
+            return colorScheme.onPrimaryContainer;
+          }
+          return colorScheme.onSurfaceVariant;
+        }),
+        overlayColor:
+        MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.pressed)) {
+            return colorScheme.onPrimary.withOpacity(0.12);
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.onPrimary.withOpacity(0.08);
+          }
+          if (states.contains(MaterialState.focused)) {
+            return colorScheme.onPrimaryContainer.withOpacity(0.12);
+          }
+          return Colors.transparent;
+        }),
+        shape: ButtonStyleButton.allOrNull<OutlinedBorder>(
+          const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }
 
@@ -84,7 +213,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('DropdownMenu Issue'),
+            title: const Text('DropdownMenu Keyboard Accessibility'),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -140,49 +269,33 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Text('DropdownMenu overlay width in ListView fills width of '
-              'viewport. Same issue not seen with menu overlay when used from '
-              'a MenuBar or MenuAnchor in a ListView.'),
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      children: const <Widget>[
+        SizedBox(height: 8),
+        Text('DropdownMenu equals keyboard focus with selection, '
+            'this prevents navigating the menu without committing a '
+            'selection as well as dismissing the menu and expecting '
+            'the state menu selection had when it was opened to be '
+            'reset without any selection made. '),
+        SizedBox(height: 8),
+        Text('FAIL:\n'
+            '- DropdownMenu keyboard focus is same as selecting an item\n'
+            '- DropdownMenu no has no ESC key to dismiss binding'),
+        SizedBox(height: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [DropDownMenuShowcase()],
         ),
-        const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Text('OK: DropdownMenu overlay width in a Column'),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: DropDownMenuShowcase(),
-        ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: const <Widget>[
-              SizedBox(height: 16),
-              Text('FAIL: DropdownMenu overlay width in ListView'),
-              DropDownMenuShowcase(),
-              SizedBox(height: 16),
-              Text('OK: DropdownMenu overlay width in ListView '
-                  'wrapped with Column'),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [DropDownMenuShowcase()],
-              ),
-              SizedBox(height: 16),
-              Text('OK: Other Menus and their overlays in a ListView'),
-              MenuBarShowcase(),
-              SizedBox(height: 16),
-              MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
-              SizedBox(height: 16),
-              ShowColorSchemeColors(),
-            ],
-          ),
-        ),
+        SizedBox(height: 16),
+        Text('OK:\n'
+            'MenuBar and MenuAnchor have ESC dismiss key binding'),
+        SizedBox(height: 8),
+        MenuBarShowcase(),
+        SizedBox(height: 16),
+        MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
+        SizedBox(height: 16),
+        ShowColorSchemeColors(),
       ],
     );
   }
@@ -213,12 +326,6 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
           value: 'one',
         ),
         DropdownMenuEntry<String>(
-          label: 'Disabled settings',
-          leadingIcon: Icon(Icons.settings),
-          value: 'two',
-          enabled: false,
-        ),
-        DropdownMenuEntry<String>(
           label: 'Cabin overview',
           leadingIcon: Icon(Icons.cabin),
           value: 'three',
@@ -232,6 +339,12 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
           label: 'Water alert',
           leadingIcon: Icon(Icons.water_damage),
           value: 'five',
+        ),
+        DropdownMenuEntry<String>(
+          label: 'Disabled settings',
+          leadingIcon: Icon(Icons.settings),
+          value: 'two',
+          enabled: false,
         ),
       ],
     );
@@ -399,9 +512,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomMenu.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    useCustomMenu.hashCode,
+  ]);
 }
 
 /// An enhanced enum to define the available menus and their shortcuts.
@@ -457,7 +570,7 @@ class _MenuAnchorContextMenuState extends State<MenuAnchorContextMenu> {
     // be registered to apply to the entire app. Menus don't register their
     // shortcuts, they only display the shortcut hint text.
     final Map<ShortcutActivator, Intent> shortcuts =
-        <ShortcutActivator, Intent>{
+    <ShortcutActivator, Intent>{
       for (final MenuEntry item in MenuEntry.values)
         if (item.shortcut != null)
           item.shortcut!: VoidCallbackIntent(() => _activate(item)),
@@ -545,7 +658,7 @@ class _MenuAnchorContextMenuState extends State<MenuAnchorContextMenu> {
               children: <Widget>[
                 const Text(
                   'Click anywhere on this container to show the '
-                  'MenuAnchor context menu.',
+                      'MenuAnchor context menu.',
                   textAlign: TextAlign.center,
                 ),
                 const Text(
@@ -888,3 +1001,83 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+
+```
+
+</details>
+
+## Used Flutter version
+
+Channel master, 3.9.0-19.0.pre.50
+
+<details>
+  <summary>Flutter doctor</summary>
+
+```
+
+flutter doctor -v          
+[✓] Flutter (Channel master, 3.9.0-19.0.pre.50, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.9.0-19.0.pre.50 on channel master at /Users/rydmike/fvm/versions/master
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 4e1ad59f75 (61 minutes ago), 2023-03-30 01:06:46 +0200
+    • Engine revision 45467e2a8b
+    • Dart version 3.0.0 (build 3.0.0-378.0.dev)
+    • DevTools version 2.22.2
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly
+      to perform update checks and upgrades.
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.2)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14C18
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+
+[✓] IntelliJ IDEA Community Edition (version 2022.3.3)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 72.1.4
+    • Dart plugin version 223.8888
+
+[✓] VS Code (version 1.76.2)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.60.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.2.1 22D68 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 111.0.5563.146
+
+[✓] Network resources
+    • All expected network resources are available.
+
+
+```
+
+</details>
+
+
+## Other Issues Related to DropdownMenu and Menus
+
+- [ ] https://github.com/flutter/flutter/issues/123615
+- [ ] https://github.com/flutter/flutter/issues/123631
+- [ ] https://github.com/flutter/flutter/issues/123736
+- [ ] https://github.com/flutter/flutter/issues/123395
+- [ ] https://github.com/flutter/flutter/issues/120567
+- [ ] https://github.com/flutter/flutter/issues/120349
+- [ ] https://github.com/flutter/flutter/issues/119743
