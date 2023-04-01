@@ -235,14 +235,14 @@ class IconButtonM3Showcase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Wrap(
+    return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 16,
       runSpacing: 4,
       children: <Widget>[
         Column(
           // Standard IconButton
-          children: <Widget>[
+          children: const <Widget>[
             _IconM3ToggleButton(
               isEnabled: true,
               tooltip: 'Standard',
@@ -257,7 +257,7 @@ class IconButtonM3Showcase extends StatelessWidget {
           ],
         ),
         Column(
-          children: <Widget>[
+          children: const <Widget>[
             // Filled IconButton
             _IconM3ToggleButton(
               isEnabled: true,
@@ -273,7 +273,7 @@ class IconButtonM3Showcase extends StatelessWidget {
           ],
         ),
         Column(
-          children: <Widget>[
+          children: const <Widget>[
             // Filled Tonal IconButton
             _IconM3ToggleButton(
               isEnabled: true,
@@ -289,7 +289,7 @@ class IconButtonM3Showcase extends StatelessWidget {
           ],
         ),
         Column(
-          children: <Widget>[
+          children: const <Widget>[
             // Outlined IconButton
             _IconM3ToggleButton(
               isEnabled: true,

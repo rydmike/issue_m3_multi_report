@@ -175,14 +175,14 @@ class HomePage extends StatelessWidget {
                 : onTextDirection(TextDirection.ltr);
           },
         ),
-        const Card(
+        Card(
           elevation: 10,
           shadowColor: Colors.transparent,
           child: Padding(
-            padding: EdgeInsets.all(32.0),
+            padding: const EdgeInsets.all(32.0),
             child: Wrap(
               spacing: 32,
-              children: [
+              children: const [
                 DrawerDesktopWrapper(child: NavigationDrawerShowcase()),
                 DrawerDesktopWrapper(child: DrawerShowcase()),
               ],

@@ -218,31 +218,31 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      children: const <Widget>[
-        SizedBox(height: 8),
-        Text('DropdownMenu equals keyboard focus with selection, '
+      children: <Widget>[
+        const SizedBox(height: 8),
+        const Text('DropdownMenu equals keyboard focus with selection, '
             'this prevents navigating the menu without committing a '
             'selection as well as dismissing the menu and expecting '
             'the state menu selection had when it was opened to be '
             'reset without any selection made. '),
-        SizedBox(height: 8),
-        Text('FAIL:\n'
+        const SizedBox(height: 8),
+        const Text('FAIL:\n'
             '- DropdownMenu keyboard focus is same as selecting an item\n'
             '- DropdownMenu no has no ESC key to dismiss binding'),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [DropDownMenuShowcase()],
+          children: [const DropDownMenuShowcase()],
         ),
-        SizedBox(height: 16),
-        Text('OK:\n'
+        const SizedBox(height: 16),
+        const Text('OK:\n'
             'MenuBar and MenuAnchor have ESC dismiss key binding'),
-        SizedBox(height: 8),
-        MenuBarShowcase(),
-        SizedBox(height: 16),
-        MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
-        SizedBox(height: 16),
-        ShowColorSchemeColors(),
+        const SizedBox(height: 8),
+        const MenuBarShowcase(),
+        const SizedBox(height: 16),
+        const MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
+        const SizedBox(height: 16),
+        const ShowColorSchemeColors(),
       ],
     );
   }
