@@ -22,7 +22,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// This issue reported here:
+// This issue reported here: https://github.com/flutter/flutter/issues/123943
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
@@ -47,14 +47,10 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
     visualDensity: VisualDensity.standard,
     appBarTheme: settings.useCustomTheme
         ? AppBarTheme(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: colorScheme.onSecondary,
           )
         : null,
-    // Correction used to show expected results:
-    // iconTheme: settings.useCustomTheme
-    //     ? IconThemeData(color: colorScheme.onPrimary)
-    //     : null,
   );
 }
 
@@ -89,7 +85,9 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text("AppBar Theme Issue"),
+            title: settings.useMaterial3
+                ? const Text("AppBar Theme Issue (Material 3)")
+                : const Text("AppBar Theme Issue (Material 2)"),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -198,6 +196,8 @@ class AppBarShowcase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool usesDefault =
+        Theme.of(context).appBarTheme == const AppBarTheme();
     return Card(
       color: colorScheme.surfaceVariant,
       child: MediaQuery.removePadding(
@@ -213,7 +213,9 @@ class AppBarShowcase extends StatelessWidget {
                   icon: const Icon(Icons.menu),
                   onPressed: () {},
                 ),
-                title: const Text('Standard AppBar Themed'),
+                title: usesDefault
+                    ? const Text('Standard AppBar Default')
+                    : const Text('Standard AppBar Themed'),
                 actions: <Widget>[
                   IconButton(
                     icon: const Icon(Icons.search),
@@ -250,7 +252,9 @@ class AppBarShowcase extends StatelessWidget {
                       icon: const Icon(Icons.menu),
                       onPressed: () {},
                     ),
-                    title: const Text('SliverAppBar Themed'),
+                    title: usesDefault
+                        ? const Text('SliverAppBar Default')
+                        : const Text('SliverAppBar Themed'),
                     actions: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.search),
@@ -290,7 +294,9 @@ class AppBarShowcase extends StatelessWidget {
                       icon: const Icon(Icons.menu),
                       onPressed: () {},
                     ),
-                    title: const Text('SliverAppBar.medium Themed'),
+                    title: usesDefault
+                        ? const Text('SliverAppBar.medium Default')
+                        : const Text('SliverAppBar.medium Themed'),
                     actions: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.search),
@@ -326,11 +332,14 @@ class AppBarShowcase extends StatelessWidget {
                 shrinkWrap: true,
                 slivers: <Widget>[
                   SliverAppBar.large(
+                    // foregroundColor: colorScheme.onTertiary,
                     leading: IconButton(
                       icon: const Icon(Icons.menu),
                       onPressed: () {},
                     ),
-                    title: const Text('SliverAppBar.large Themed'),
+                    title: usesDefault
+                        ? const Text('SliverAppBar.large Default')
+                        : const Text('SliverAppBar.large Themed'),
                     actions: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.search),

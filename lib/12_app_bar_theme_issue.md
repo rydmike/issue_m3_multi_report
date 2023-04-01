@@ -1,45 +1,63 @@
-## AppBar theming issue
+## SliverAppBar.medium and SliverAppBar.large Theming and Defaults Issue
 
+### 1) AppBar with Themed and Widget Assigned Color Foreground
 
-The `AppBar`'s foreground theme color, from theme or widget foreground color are not applied to action icons for `SliverAppBar.medium` and `SliverAppBar.large`.
-          
-The defaults for M2 foreground color on a `SliverAppBar.medium` and `SliverAppBar.large` are incorrect in light theme mode.
+The `AppBar`'s foreground theme color, from theme or widget foreground color properties are **not applied** to action icon color for `SliverAppBar.medium` and `SliverAppBar.large`.
 
-A previous fix related to `SliverAppBar.medium` and `SliverAppBar.large` was made in this [FIX PR #118322](https://github.com/flutter/flutter/pull/118322), but it did not address these issues. Another [FIX PR #122542](https://github.com/flutter/flutter/pull/122542) is still open, it adresses multiple related AppBar issues. Adressing these issues could potentially be added to it, or of course addressed later as a separate fix.
+### 2) AppBar with Default Foreground Color in M2
+
+The defaults for M2 foreground color on a `SliverAppBar.medium` and `SliverAppBar.large` are **incorrect** in **light theme** mode when using **Material 2**.
+
+### Background and Work in Progress
+
+A previous fix related to `SliverAppBar.medium` and `SliverAppBar.large` was made in this [FIX PR #118322](https://github.com/flutter/flutter/pull/118322), but it did not address these issues.
+
+Another [FIX PR #122542](https://github.com/flutter/flutter/pull/122542) is still open, it addresses multiple related AppBar issues. It is unknown if it addresses any of these issues, it probably does not. Addressing these issues could potentially be added to it, or of course addressed later as a separate fix.
+
 
 ## Expected results
 
-Expect correct themed and widget foreground color to be used in M2 and M3 mode on `SliverAppBar.medium` and `SliverAppBar.large`. 
+### 1) AppBar with Themed and Widget Assigned Color Foreground
+
+Expect correct themed and widget foreground color to be used in M2 and M3 mode on `SliverAppBar.medium` and `SliverAppBar.large`.
+
 
 | Light theme | Dark theme |
 |-------------|------------|
-|             |            |
+| Material 2  | Material 2 |
+| ![Screenshot 2023-04-01 at 22 50 16](https://user-images.githubusercontent.com/39990307/229311312-8d7d5f31-5870-4b56-b178-b85b7662f705.png) | ![Screenshot 2023-04-01 at 22 51 04](https://user-images.githubusercontent.com/39990307/229311344-8aceb486-03ce-415f-aae6-34f1d9863f96.png) |
+| Material 3  | Material 3 |
+| ![Screenshot 2023-04-01 at 22 51 30](https://user-images.githubusercontent.com/39990307/229311367-95b04c45-76b1-4e35-a1bd-a4e28de23d64.png) | ![Screenshot 2023-04-01 at 22 51 51](https://user-images.githubusercontent.com/39990307/229311388-5c0b5ae0-833e-40a7-8920-066ae4d98a10.png) |
 
+### 2) AppBar with Default Foreground Color in M2
 
-Expect Material 2 light theme to use correct default foreground color on `SliverAppBar.medium` and `SliverAppBar.large`.
+Expect Material 2 theme to use correct default foreground color on `SliverAppBar.medium` and `SliverAppBar.large`.
 
 | Light theme | Dark theme |
 |-------------|------------|
-|             |            |
-
+|  ![Screenshot 2023-04-01 at 22 33 00](https://user-images.githubusercontent.com/39990307/229310937-c2aaae59-5dc6-49a4-803d-64976e642e77.png)           | ![Screenshot 2023-04-01 at 22 34 31](https://user-images.githubusercontent.com/39990307/229310959-cfd0f969-159c-49b6-ab62-7a32c2e42343.png) |
 
 ## Actual results
 
-Get incorrect themed and widget foreground color to be used in M2 and M3 mode on `SliverAppBar.medium` and `SliverAppBar.large`.
+### 1) AppBar with Themed and Widget Assigned Color Foreground
 
-
-| Light theme | Dark theme |
-|-------------|------------|
-|             |            |
-
-Expect Material 2 light theme to use correct default foreground color on `SliverAppBar.medium` and `SliverAppBar.large`.
-
+Get **incorrect** themed and widget foreground color in both M2 and M3 mode on `SliverAppBar.medium` and `SliverAppBar.large` on **action icons**, as shown below:
 
 | Light theme | Dark theme |
 |-------------|------------|
-|             |            |
+| Material 2  | Material 2 |
+| ![Screenshot 2023-04-01 at 23 03 43](https://user-images.githubusercontent.com/39990307/229311839-632d3f3d-1395-49c3-b294-2dcd5519d5fb.png) | ![Screenshot 2023-04-01 at 23 05 23](https://user-images.githubusercontent.com/39990307/229311872-ddb3ced9-678e-491f-b085-e836c178b879.png) |
+| Material 3  | Material 3 |
+| ![Screenshot 2023-04-01 at 23 06 12](https://user-images.githubusercontent.com/39990307/229311893-74e60133-a601-4c83-9974-92a2d54a11f2.png) | ![Screenshot 2023-04-01 at 23 06 55](https://user-images.githubusercontent.com/39990307/229311920-47e08933-9b1f-4446-83f7-8254b0ed17b5.png) |
 
 
+### 2) AppBar with Default Foreground Color in M2
+
+In Material 2 mode, when using light theme mode, get **incorrect** default foreground color on `SliverAppBar.medium` and `SliverAppBar.large` **title** and **action icons**, as shown below:
+
+| Light theme | Dark theme |
+|-------------|------------|
+| ![Screenshot 2023-04-01 at 22 44 07](https://user-images.githubusercontent.com/39990307/229311113-f368f814-5813-4d8d-a746-41c6a330ec6e.png) | ![Screenshot 2023-04-01 at 22 45 29](https://user-images.githubusercontent.com/39990307/229311133-4899bbc9-b603-49b3-8df6-29fff96074d6.png) |
 
 ## Issue sample code
 
@@ -72,6 +90,8 @@ Expect Material 2 light theme to use correct default foreground color on `Sliver
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+// This issue reported here:
+
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
 // Make M3 ColorSchemes from a seed color.
@@ -87,7 +107,7 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
 
   return ThemeData(
     colorScheme: colorScheme,
@@ -95,9 +115,9 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
     visualDensity: VisualDensity.standard,
     appBarTheme: settings.useCustomTheme
         ? AppBarTheme(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-          )
+      backgroundColor: colorScheme.secondary,
+      foregroundColor: colorScheme.onSecondary,
+    )
         : null,
   );
 }
@@ -133,7 +153,9 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text("AppBar Theme Issue"),
+            title: settings.useMaterial3
+                ? const Text("AppBar Theme Issue (Material 3)")
+                : const Text("AppBar Theme Issue (Material 2)"),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -215,10 +237,10 @@ class HomePage extends StatelessWidget {
         const SizedBox(height: 8),
         const Text(
           "The AppBar's foreground color is not applied to action icons "
-          'for SliverAppBar.medium and large.\n'
-          '\n'
-          'The defaults for M2 foreground color on a SliverAppBar.medium '
-          'and large are incorrect light theme mode.\n',
+              'for SliverAppBar.medium and large.\n'
+              '\n'
+              'The defaults for M2 foreground color on a SliverAppBar.medium '
+              'and large are incorrect light theme mode.\n',
         ),
         SwitchListTile(
           title: const Text('Enable custom AppBar theme'),
@@ -242,6 +264,8 @@ class AppBarShowcase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool usesDefault =
+        Theme.of(context).appBarTheme == const AppBarTheme();
     return Card(
       color: colorScheme.surfaceVariant,
       child: MediaQuery.removePadding(
@@ -257,7 +281,9 @@ class AppBarShowcase extends StatelessWidget {
                   icon: const Icon(Icons.menu),
                   onPressed: () {},
                 ),
-                title: const Text('Standard AppBar Themed'),
+                title: usesDefault
+                    ? const Text('Standard AppBar Default')
+                    : const Text('Standard AppBar Themed'),
                 actions: <Widget>[
                   IconButton(
                     icon: const Icon(Icons.search),
@@ -294,7 +320,9 @@ class AppBarShowcase extends StatelessWidget {
                       icon: const Icon(Icons.menu),
                       onPressed: () {},
                     ),
-                    title: const Text('SliverAppBar Themed'),
+                    title: usesDefault
+                        ? const Text('SliverAppBar Default')
+                        : const Text('SliverAppBar Themed'),
                     actions: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.search),
@@ -334,7 +362,9 @@ class AppBarShowcase extends StatelessWidget {
                       icon: const Icon(Icons.menu),
                       onPressed: () {},
                     ),
-                    title: const Text('SliverAppBar.medium Themed'),
+                    title: usesDefault
+                        ? const Text('SliverAppBar.medium Default')
+                        : const Text('SliverAppBar.medium Themed'),
                     actions: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.search),
@@ -370,11 +400,14 @@ class AppBarShowcase extends StatelessWidget {
                 shrinkWrap: true,
                 slivers: <Widget>[
                   SliverAppBar.large(
+                    // foregroundColor: colorScheme.onTertiary,
                     leading: IconButton(
                       icon: const Icon(Icons.menu),
                       onPressed: () {},
                     ),
-                    title: const Text('SliverAppBar.large Themed'),
+                    title: usesDefault
+                        ? const Text('SliverAppBar.large Default')
+                        : const Text('SliverAppBar.large Themed'),
                     actions: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.search),
@@ -459,9 +492,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomTheme.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    useCustomTheme.hashCode,
+  ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
@@ -808,7 +841,6 @@ flutter doctor -v
 
 [✓] Network resources
     • All expected network resources are available.
-
 
 
 ```
