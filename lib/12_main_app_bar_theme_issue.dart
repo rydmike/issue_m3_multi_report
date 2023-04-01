@@ -52,9 +52,9 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
           )
         : null,
     // Correction used to show expected results:
-    iconTheme: settings.useCustomTheme
-        ? IconThemeData(color: colorScheme.onPrimary)
-        : null,
+    // iconTheme: settings.useCustomTheme
+    //     ? IconThemeData(color: colorScheme.onPrimary)
+    //     : null,
   );
 }
 
@@ -89,9 +89,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: Theme.of(context).useMaterial3
-                ? const Text("AppBar Theme Issue (Material 3)")
-                : const Text("AppBar Theme Issue (Material 2)"),
+            title: const Text("AppBar Theme Issue"),
             actions: [
               IconButton(
                 icon: settings.useMaterial3

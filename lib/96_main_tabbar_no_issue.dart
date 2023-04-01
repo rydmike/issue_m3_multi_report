@@ -14,15 +14,13 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-// This issue reported here:
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
@@ -41,21 +39,48 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
       mode == ThemeMode.light ? schemeLight : schemeDark;
 
+  const bool tintInteract = true;
+
+  final Color overlayBase =
+      (settings.useMaterial3 ? colorScheme.tertiary : colorScheme.onPrimary);
+
   return ThemeData(
-    colorScheme: colorScheme,
-    useMaterial3: settings.useMaterial3,
-    visualDensity: VisualDensity.standard,
-    appBarTheme: settings.useCustomTheme
-        ? AppBarTheme(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-          )
-        : null,
-    // Correction used to show expected results:
-    iconTheme: settings.useCustomTheme
-        ? IconThemeData(color: colorScheme.onPrimary)
-        : null,
-  );
+      colorScheme: colorScheme,
+      useMaterial3: settings.useMaterial3,
+      visualDensity: VisualDensity.standard,
+      tabBarTheme: settings.useCustomTheme
+          ? TabBarTheme(
+              unselectedLabelColor: colorScheme.error,
+              overlayColor: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected)) {
+                  if (states.contains(MaterialState.hovered)) {
+                    return overlayBase.withAlpha(kAlphaHovered);
+                  }
+                  if (states.contains(MaterialState.focused)) {
+                    return overlayBase.withAlpha(kAlphaFocused);
+                  }
+                  if (states.contains(MaterialState.pressed)) {
+                    return overlayBase.withAlpha(kAlphaPressed);
+                  }
+                  return null;
+                }
+                if (states.contains(MaterialState.hovered)) {
+                  if (tintInteract) return overlayBase.withAlpha(kAlphaHovered);
+                  return colorScheme.onSurface.withAlpha(kAlphaHovered);
+                }
+                if (states.contains(MaterialState.focused)) {
+                  if (tintInteract) return overlayBase.withAlpha(kAlphaFocused);
+                  return colorScheme.onSurface.withAlpha(kAlphaFocused);
+                }
+                if (states.contains(MaterialState.pressed)) {
+                  if (tintInteract) return overlayBase.withAlpha(kAlphaPressed);
+                  return overlayBase.withAlpha(kAlphaPressed);
+                }
+                return null;
+              }),
+            )
+          : null);
 }
 
 void main() {
@@ -89,9 +114,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: Theme.of(context).useMaterial3
-                ? const Text("AppBar Theme Issue (Material 3)")
-                : const Text("AppBar Theme Issue (Material 2)"),
+            title: const Text("Clip Missing in Drawer's Material"),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -172,21 +195,29 @@ class HomePage extends StatelessWidget {
       children: [
         const SizedBox(height: 8),
         const Text(
-          "The AppBar's foreground color is not applied to action icons "
-          'for SliverAppBar.medium and large.\n'
-          '\n'
-          'The defaults for M2 foreground color on a SliverAppBar.medium '
-          'and large are incorrect light theme mode.\n',
+          'M2 Drawer was straight, it needed no clipping on used Material. '
+          'M3 needs it or a widget may cover its rounded corners.',
         ),
+        // SwitchListTile(
+        //   title: const Text('Text directionality'),
+        //   subtitle: const Text('OFF=LTR, ON=RTL Used later to test menu '
+        //       'indicator works correctly in both modes.'),
+        //   value: textDirection == TextDirection.rtl,
+        //   onChanged: (bool value) {
+        //     value
+        //         ? onTextDirection(TextDirection.rtl)
+        //         : onTextDirection(TextDirection.ltr);
+        //   },
+        // ),
         SwitchListTile(
-          title: const Text('Enable custom AppBar theme'),
+          title: const Text('Enable custom TabBar theme'),
           value: settings.useCustomTheme,
           onChanged: (bool value) {
             onSettings(settings.copyWith(useCustomTheme: value));
           },
         ),
         const SizedBox(height: 16),
-        const AppBarShowcase(),
+        const TabBarForAppBarShowcase(),
         const SizedBox(height: 16),
         const ShowColorSchemeColors(),
       ],
@@ -194,174 +225,45 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class AppBarShowcase extends StatelessWidget {
-  const AppBarShowcase({super.key});
+class TabBarForAppBarShowcase extends StatelessWidget {
+  const TabBarForAppBarShowcase({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return Card(
-      color: colorScheme.surfaceVariant,
-      child: MediaQuery.removePadding(
-        context: context,
-        removeBottom: true,
-        removeTop: true,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: <Widget>[
-              AppBar(
-                leading: IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () {},
+    final ThemeData theme = Theme.of(context);
+    final bool isDark = theme.brightness == Brightness.dark;
+    final bool useM3 = theme.useMaterial3;
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    final Color effectiveTabBackground = theme.appBarTheme.backgroundColor ??
+        (isDark
+            ? colorScheme.surface
+            : useM3
+                ? colorScheme.surface
+                : colorScheme.primary);
+
+    return DefaultTabController(
+      length: 3,
+      child: Material(
+        color: effectiveTabBackground,
+        child: const SizedBox(
+          height: 70,
+          child: TabBar(
+            tabs: <Widget>[
+              Tab(
+                text: 'Chat',
+                icon: Badge(
+                  label: Text('18'),
+                  child: Icon(Icons.chat_bubble),
                 ),
-                title: const Text('Standard AppBar Themed'),
-                actions: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {},
-                  ),
-                ],
               ),
-              const SizedBox(height: 16),
-              AppBar(
-                backgroundColor: colorScheme.tertiary,
-                foregroundColor: colorScheme.onTertiary,
-                leading: IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () {},
-                ),
-                title: const Text('Standard AppBar Widget Colors'),
-                actions: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {},
-                  ),
-                ],
+              Tab(
+                text: 'Tasks',
+                icon: Icon(Icons.beenhere),
               ),
-              // A bit nasty usage of CustomScrollViews and Slivers and
-              // shrinkWraps, to show what the SliverAppBars look like, don't
-              // do this in a production app. With just a few widgets,
-              // we can get away with it.
-              const SizedBox(height: 16),
-              CustomScrollView(
-                shrinkWrap: true,
-                slivers: <Widget>[
-                  SliverAppBar(
-                    leading: IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () {},
-                    ),
-                    title: const Text('SliverAppBar Themed'),
-                    actions: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () {},
-                      ),
-                    ],
-                  )
-                ],
-              ),
-              const SizedBox(height: 16),
-              CustomScrollView(
-                shrinkWrap: true,
-                slivers: <Widget>[
-                  SliverAppBar(
-                    backgroundColor: colorScheme.tertiary,
-                    foregroundColor: colorScheme.onTertiary,
-                    leading: IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () {},
-                    ),
-                    title: const Text('SliverAppBar Widget Colors'),
-                    actions: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () {},
-                      ),
-                    ],
-                  )
-                ],
-              ),
-              const SizedBox(height: 16),
-              CustomScrollView(
-                shrinkWrap: true,
-                slivers: <Widget>[
-                  SliverAppBar.medium(
-                    leading: IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () {},
-                    ),
-                    title: const Text('SliverAppBar.medium Themed'),
-                    actions: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () {},
-                      ),
-                    ],
-                  )
-                ],
-              ),
-              const SizedBox(height: 16),
-              CustomScrollView(
-                shrinkWrap: true,
-                slivers: <Widget>[
-                  SliverAppBar.medium(
-                    backgroundColor: colorScheme.tertiary,
-                    foregroundColor: colorScheme.onTertiary,
-                    leading: IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () {},
-                    ),
-                    title: const Text('SliverAppBar.medium Widget Colors'),
-                    actions: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () {},
-                      ),
-                    ],
-                  )
-                ],
-              ),
-              const SizedBox(height: 16),
-              CustomScrollView(
-                shrinkWrap: true,
-                slivers: <Widget>[
-                  SliverAppBar.large(
-                    leading: IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () {},
-                    ),
-                    title: const Text('SliverAppBar.large Themed'),
-                    actions: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () {},
-                      ),
-                    ],
-                  )
-                ],
-              ),
-              const SizedBox(height: 16),
-              CustomScrollView(
-                shrinkWrap: true,
-                slivers: <Widget>[
-                  SliverAppBar.large(
-                    backgroundColor: colorScheme.tertiary,
-                    foregroundColor: colorScheme.onTertiary,
-                    leading: IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () {},
-                    ),
-                    title: const Text('SliverAppBar.large Widget Colors'),
-                    actions: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () {},
-                      ),
-                    ],
-                  )
-                ],
+              Tab(
+                text: 'Folder',
+                icon: Icon(Icons.create_new_folder),
               ),
             ],
           ),
@@ -703,3 +605,24 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+/// The amount of alpha based opacity used on tinted hover effect.
+///
+/// Same value as used on Hover opacity on controls in M3, given as alpha.
+///
+/// Value: 0x14 = 20 = 8%
+const int kAlphaHovered = 0x14;
+
+/// The amount of alpha based opacity used on tinted pressed effect.
+///
+/// Same value as used on pressed opacity on controls in M3, given as alpha.
+///
+/// Value: 0x1F = 31 = 12.16%
+const int kAlphaPressed = 0x1F;
+
+/// The amount of alpha based opacity used on tinted focus effect.
+///
+/// Same value as used on focused opacity on controls in M3, given as alpha.
+///
+/// Value: 0x1F = 31 = 12.16%
+const int kAlphaFocused = 0x1F;

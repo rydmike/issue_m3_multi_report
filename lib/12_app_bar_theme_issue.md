@@ -1,3 +1,53 @@
+## AppBar theming issue
+
+
+The `AppBar`'s foreground theme color, from theme or widget foreground color are not applied to action icons for `SliverAppBar.medium` and `SliverAppBar.large`.
+          
+The defaults for M2 foreground color on a `SliverAppBar.medium` and `SliverAppBar.large` are incorrect in light theme mode.
+
+A previous fix related to `SliverAppBar.medium` and `SliverAppBar.large` was made in this [FIX PR #118322](https://github.com/flutter/flutter/pull/118322), but it did not address these issues. Another [FIX PR #122542](https://github.com/flutter/flutter/pull/122542) is still open, it adresses multiple related AppBar issues. Adressing these issues could potentially be added to it, or of course addressed later as a separate fix.
+
+## Expected results
+
+Expect correct themed and widget foreground color to be used in M2 and M3 mode on `SliverAppBar.medium` and `SliverAppBar.large`. 
+
+| Light theme | Dark theme |
+|-------------|------------|
+|             |            |
+
+
+Expect Material 2 light theme to use correct default foreground color on `SliverAppBar.medium` and `SliverAppBar.large`.
+
+| Light theme | Dark theme |
+|-------------|------------|
+|             |            |
+
+
+## Actual results
+
+Get incorrect themed and widget foreground color to be used in M2 and M3 mode on `SliverAppBar.medium` and `SliverAppBar.large`.
+
+
+| Light theme | Dark theme |
+|-------------|------------|
+|             |            |
+
+Expect Material 2 light theme to use correct default foreground color on `SliverAppBar.medium` and `SliverAppBar.large`.
+
+
+| Light theme | Dark theme |
+|-------------|------------|
+|             |            |
+
+
+
+## Issue sample code
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -21,8 +71,6 @@
 // SOFTWARE.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-// This issue reported here:
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
@@ -50,10 +98,6 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
             backgroundColor: colorScheme.primary,
             foregroundColor: colorScheme.onPrimary,
           )
-        : null,
-    // Correction used to show expected results:
-    iconTheme: settings.useCustomTheme
-        ? IconThemeData(color: colorScheme.onPrimary)
         : null,
   );
 }
@@ -89,9 +133,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: Theme.of(context).useMaterial3
-                ? const Text("AppBar Theme Issue (Material 3)")
-                : const Text("AppBar Theme Issue (Material 2)"),
+            title: const Text("AppBar Theme Issue"),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -703,3 +745,72 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+
+</details>
+
+## Used Flutter version
+
+Channel master, 3.9.0-20.0.pre.76
+
+<details>
+  <summary>Flutter doctor</summary>
+
+```
+
+flutter doctor -v
+[✓] Flutter (Channel master, 3.9.0-20.0.pre.76, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.9.0-20.0.pre.76 on channel master at /Users/rydmike/fvm/versions/master
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 1d90b7654a (6 hours ago), 2023-04-01 09:10:01 -0400
+    • Engine revision dc204128ff
+    • Dart version 3.0.0 (build 3.0.0-393.0.dev)
+    • DevTools version 2.22.2
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git"
+      directly to perform update checks and upgrades.
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.3)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14E222b
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+
+[✓] IntelliJ IDEA Community Edition (version 2023.1)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 72.1.5
+    • Dart plugin version 231.8109.91
+
+[✓] VS Code (version 1.77.0)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.60.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.2.1 22D68 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 111.0.5563.146
+
+[✓] Network resources
+    • All expected network resources are available.
+
+
+
+```
+
+</details>
