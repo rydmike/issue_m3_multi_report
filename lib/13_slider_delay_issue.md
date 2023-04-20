@@ -1,3 +1,63 @@
+## Yet another analysis of the issue
+
+Since I am well aware of this issue and have seen it a lot, here is my analysis of its causes. As far as I can see, there are potentially two issues at play in this report.
+
+1) Stutter when using a continuous Slider based on `int` value
+2) Delay on discrete Slider with both `int` and `double` based values.
+
+Let's tackle them both.
+
+## 1) Stutter when using continuous Slider based on `int` value
+
+This case is pretty logical. If your source value is based on an `int` value, and the Slider is continuous, you get a double value back and Slider has moved/operated a bit, this is reflected in the returned value. When you convert this value to an `int` and assign it back to the Slider's value, it will "stutter" when it reverts back to the integer value. This will happen until returned new double value reaches the next integer value, and it snaps to new integer value.
+
+Using integer as source value for a Slider is fine, but it is only "visually" compatible with using a discrete Slider where its discrete steps are also integer values.
+
+The conversion between `int` and `double` is negligible and not behind the stutter or any visually observed delay.
+
+We can demonstrate this. Sliders below share values, so that we can observe their behavior differences.
+
+Moving the continuous INT Slider, it sets `int` value and uses an `int` value back from returned new value via `double` conversion. Moving it slowly, we can se it tries to move, but it is forced back to int the value, causing the stutter.
+
+We can even see the same effect on the Continuous INT Slider when we operate the Continuous DOUBLE Slider, since they share double control value.
+
+https://user-images.githubusercontent.com/39990307/233476108-2a8172ee-9f66-4f43-a02d-6520ab21029e.mov
+
+**Conclusion**: To avoid the stutter, only use `int` input control values with discrete Sliders, that can match its selectable and returned discrete Slider double values. Some documentation to explain this might be helpful.
+
+## 2) Delay on discrete Slider with both `int` and `double` based values
+
+Regarding the delay when operating **Sliders**, we can see and observe that the thumb **LAGS** considerably behind when operating **discrete** Sliders, this does not happen with **continuous** Sliders. The delay does not depend at all on if source value is `double` or `int` based (other than the unrelated and logical int stutter above for continuous Slider).
+
+We can see this below, where when operating the discrete Sliders, the Slider thumb lags a lot behind the mouse (or finger touch), when it is moved rapidly:
+
+https://user-images.githubusercontent.com/39990307/233477263-2ee3d7a3-271f-4ee9-9ab3-8ae96d45614c.mov
+
+Concerning the cause of this delay, @VadimMalykhin has the right idea, the lag is caused by a hard coded animation delay. The referenced value is, however, incorrect:
+
+https://github.com/flutter/flutter/blob/55825f166e4e4d5e397633a1e61dae42992effd5/packages/flutter/lib/src/material/slider.dart#L532
+
+Alternatively, the Slider has since he made his observation (it was a while ago) been changed. Changing the suggested constant to **zero**, does not remove the observed delay.
+
+The actual delay is deeper, it is in the `_RenderSlider` that extends `RenderBox` here:
+
+https://github.com/flutter/flutter/blob/55825f166e4e4d5e397633a1e61dae42992effd5/packages/flutter/lib/src/material/slider.dart#L1076
+
+If we set this constant duration to zero, we can get a much nicer discrete **Sliders** that tracks rapid mouse or finger operations much better. As shown below where the above constant was set to **zero**:
+
+https://user-images.githubusercontent.com/39990307/233479112-0cc820ef-44af-43b4-8b8c-75e670bf87cc.mov
+
+I don't know what the rationale behind this delay is. **My guess is**, if you have a discrete Slider with only a few discrete values, the animation makes sense. It allows the thumb to nicely slide animate to the next value. However, if your discrete Slider has a large number of discrete values, this animation no longer makes any sense. Just jumping to the next value would then be better, since it is getting closer to the continuous use case.
+
+I agree that this constant should be exposed so users can modify it to fit their use case.
+
+## Example code
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -39,7 +99,7 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
 
   return ThemeData(
       colorScheme: colorScheme,
@@ -316,9 +376,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomTheme.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    useCustomTheme.hashCode,
+  ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
@@ -602,3 +662,8 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+
+</details>
+

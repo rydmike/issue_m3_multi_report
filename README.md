@@ -16,5 +16,6 @@ The following issues have their reproduction code sample, and also the original 
  - (10) [IconButton theming destroys variant styles](https://github.com/flutter/flutter/issues/123829)
  - (11) [Clipping is missing on M3 Drawer](https://github.com/flutter/flutter/issues/123863)
  - (12) [SliverAppBar.medium and SliverAppBar.large Theming and Defaults](https://github.com/flutter/flutter/issues/123943)
+ - (13) [Slider has a slight a lag when drag](https://github.com/flutter/flutter/issues/51715)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.
