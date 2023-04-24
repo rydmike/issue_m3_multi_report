@@ -4,7 +4,7 @@ This is not an effect of `applySurfaceTint`, this is in fact **expected behavior
 
 What you are in fact looking at, and why the `Card` is getting darker is the effect of seeing the shadow it casts underneath itself, through a partially opaque surface.
 
-The `Material` shadow used by `Card` is not like an edge effect on a box. It tries to mimic the physical effect in the world of something being elevated and having a shadow cast from a light source some up in the left upper corner. When the `Material` in the `Card` is elevated it by default casts a shadow using black color underneath its entire surface. In this case you then see this shadow through the semi-transparent material, and it appears to be a darker shade of red than the one being directly on top of the white background.
+The `Material` shadow used by `Card` is not like an edge effect on a box. It tries to mimic the physical effect in the world of something being elevated and having a shadow cast from a light source somewhere up from the top viewport edge. When the `Material` in the `Card` is elevated it by default casts a shadow using black color underneath its entire surface. In this case you then see this shadow through the semi-transparent material, and it appears to be a darker shade of red than the one being directly on top of the white background.
 
 The effect is reasonable, it is not an exact physical match of something totally transparent when you make it 100% transparent. I think the impact of the shadow underneath on the transparent `Material` is perhaps a bit too much, especially when it is full transparent.
 
