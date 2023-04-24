@@ -1,3 +1,39 @@
+## Analysis of the Card color
+
+This is not an effect of `applySurfaceTint`, this is in fact **expected behavior**. It also looks the same in M2 and M3.
+
+What you are in fact looking at, and why the `Card` is getting darker is the effect of seeing the shadow it casts underneath itself, through a partially opaque surface.
+
+The `Material` shadow used by `Card` is not like an edge effect on a box. It tries to mimic the physical effect in the world of something being elevated and having a shadow cast from a light source some up in the left upper corner. When the `Material` in the `Card` is elevated it by default casts a shadow using black color underneath its entire surface. In this case you then see this shadow through the semi-transparent material, and it appears to be a darker shade of red than the one being directly on top of the white background.
+
+The effect is reasonable, it is not an exact physical match of something totally transparent when you make it 100% transparent. I think the impact of the shadow underneath on the transparent `Material` is perhaps a bit too much, especially when it is full transparent.
+
+### Demo
+
+Here is demo where we can first show that it is the same in M3 and M2
+
+| Card elevation Material 3 | Card elevation Material 2 | 
+|----|----|
+|![Screenshot 2023-04-24 at 21 15 48](https://user-images.githubusercontent.com/39990307/234081653-e5bdb08a-7cc7-4ee3-a571-907805b953fe.png) |![Screenshot 2023-04-24 at 21 16 09](https://user-images.githubusercontent.com/39990307/234081722-99cabc9b-da98-4745-928b-3e2cc0955494.png) |
+
+### Video showing the elevation of Material and shadow
+
+With the sample app we can experiment with the variables and observe the effects.
+
+Here is a short video when changing opacity, elevation and also removing shadow to get rid of the "color" change, which is the only way to take away this effect with `Material`.
+
+https://user-images.githubusercontent.com/39990307/234082465-7db8d4c6-2a3a-4e1e-995d-15e672cdc6ed.mov
+
+
+Hope this helps! 😄 💙
+
+## Example code
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -39,7 +75,7 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
 
   return ThemeData(
     colorScheme: colorScheme,
@@ -142,7 +178,7 @@ class HomePage extends StatelessWidget {
         Padding(
           padding: EdgeInsets.all(16.0),
           child:
-              Text('Example of Card with Elevation, Opacity, Tint and Shadow.'),
+          Text('Example of Card with Elevation, Opacity, Tint and Shadow.'),
         ),
         SizedBox(height: 16),
         CardShowCase(),
@@ -249,7 +285,7 @@ class _CardShowCaseState extends State<CardShowCase> {
                 height: 150,
                 child: Center(
                   child:
-                      Text('Card\nElevation\n${elevation.toStringAsFixed(3)}'),
+                  Text('Card\nElevation\n${elevation.toStringAsFixed(3)}'),
                 ),
               ),
             ),
@@ -318,9 +354,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomTheme.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    useCustomTheme.hashCode,
+  ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
@@ -604,3 +640,8 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+
+</details>
+
