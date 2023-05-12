@@ -1,3 +1,8 @@
+// NOTE:
+//
+// Copy the code for the issue sample to test here. It always only contains
+// the sample last looked at.
+
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -14,15 +19,16 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-// See issue: https://github.com/flutter/flutter/issues/126623
+// This issue reported here: https://github.com/flutter/flutter/issues/123631
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
@@ -40,33 +46,10 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
       mode == ThemeMode.light ? schemeLight : schemeDark;
-
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
-    // No input decorator property in search bar theme.
-    searchBarTheme: const SearchBarThemeData(),
-    // No input decorator property in search view theme.
-    searchViewTheme: const SearchViewThemeData(),
-    //
-    // This theme pollutes the SearchBar and SearchView with a look we may not
-    // want on them, but we may otherwise want a custom input decoration.
-    // The SearchBar has code that attempts to get rid of borders, in app
-    // level input decorator but it does not remove all borders,
-    // so these will remain visible.
-    inputDecorationTheme: settings.useCustomTheme
-        ? InputDecorationTheme(
-            fillColor: colorScheme.tertiaryContainer,
-            filled: true,
-            border: const UnderlineInputBorder(),
-            focusedBorder: const UnderlineInputBorder(),
-            enabledBorder: const UnderlineInputBorder(),
-            errorBorder: const UnderlineInputBorder(),
-            focusedErrorBorder: const UnderlineInputBorder(),
-            disabledBorder: const UnderlineInputBorder(),
-          )
-        : null,
   );
 }
 
@@ -87,7 +70,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
   TextDirection textDirection = TextDirection.ltr;
   ThemeSettings settings = const ThemeSettings(
     useMaterial3: true,
-    useCustomTheme: true,
+    useCustomMenu: false,
   );
 
   @override
@@ -101,9 +84,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
-            title: settings.useMaterial3
-                ? const Text("SearchAnchor gets Decorator theme (Material 3)")
-                : const Text("SearchAnchor gets Decorator theme (Material 2)"),
+            title: const Text('DropdownMenu Issue'),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -141,18 +122,6 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
                 settings = value;
               });
             },
-            longLabel: longLabel,
-            onLongLabel: (bool value) {
-              setState(() {
-                longLabel = value;
-              });
-            },
-            textDirection: textDirection,
-            onTextDirection: (TextDirection value) {
-              setState(() {
-                textDirection = value;
-              });
-            },
           ),
         ),
       ),
@@ -165,74 +134,50 @@ class HomePage extends StatelessWidget {
     super.key,
     required this.settings,
     required this.onSettings,
-    required this.longLabel,
-    required this.onLongLabel,
-    required this.textDirection,
-    required this.onTextDirection,
   });
   final ThemeSettings settings;
   final ValueChanged<ThemeSettings> onSettings;
-  final bool longLabel;
-  final ValueChanged<bool> onLongLabel;
-  final TextDirection textDirection;
-  final ValueChanged<TextDirection> onTextDirection;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 8),
         const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text(
-            "Using SearchAnchor we always get app InputDecorator theme.\n"
-            '\n'
-            'If we add an InputDecorationTheme to the overall app theme, '
-            'the SearchAnchor input entry picks it up, we may not want this '
-            'design on it.\n'
-            '\n'
-            'We can not give it a separate InputDecorationTheme style or '
-            'set it back to default for the SearchAnchor only via a '
-            'component theme. Even wrapping the SearchAnchor with a '
-            'Theme using a default InputDecorator, only removes it on '
-            'the SearchBar, not on the SearchView.',
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: Text('DropdownMenu overlay width in ListView fills width of '
+              'viewport. Same issue not seen with menu overlay when used from '
+              'a MenuBar or MenuAnchor in a ListView.'),
         ),
-        SwitchListTile(
-          title: const Text('Enable InputDecorationTheme'),
-          value: settings.useCustomTheme,
-          onChanged: (bool value) {
-            onSettings(settings.copyWith(useCustomTheme: value));
-          },
+        const SizedBox(height: 8),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: Text('OK: DropdownMenu overlay width in a Column'),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 8),
-              const TextField(
-                decoration: InputDecoration(hintText: 'Themed text entry'),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: DropDownMenuShowcase(),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            children: <Widget>[
+              const SizedBox(height: 16),
+              const Text('FAIL: DropdownMenu overlay width in ListView'),
+              const DropDownMenuShowcase(),
+              const SizedBox(height: 16),
+              const Text('OK: DropdownMenu overlay width in ListView '
+                  'wrapped with Column'),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [const DropDownMenuShowcase()],
               ),
               const SizedBox(height: 16),
-              const Text('SearchAnchor with no theme, gets decorator theme'),
-              const Text('SearchAnchor has code attempt to remove it, '
-                  'but fails with some borders.'),
-              const DemoSearchBar(),
+              const Text('OK: Other Menus and their overlays in a ListView'),
+              const MenuBarShowcase(),
               const SizedBox(height: 16),
-              const Text('SearchAnchor wrapped with Theme using default '
-                  'InputDecorator theme.'),
-              const Text('This removes decorator on SearchBar, but not '
-                  'on the view, click search to see it.'),
-              //
-              // This Theme wrapper gets rid of the app level InputDecorator
-              // on the SearchBar, but it remains on the SearchView overlay
-              // despite this wrapper. The SearchView must be in another
-              // context that we cannot even impact by wrapping this part
-              // of the tree in a new Theme.
-              //
-              Theme(
-                  data: Theme.of(context).copyWith(
-                      inputDecorationTheme: const InputDecorationTheme()),
-                  child: const DemoSearchBar()),
+              const MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
               const SizedBox(height: 16),
               const ShowColorSchemeColors(),
             ],
@@ -243,119 +188,171 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class DemoSearchBar extends StatefulWidget {
-  const DemoSearchBar({super.key});
+class DropDownMenuShowcase extends StatefulWidget {
+  const DropDownMenuShowcase({super.key});
 
   @override
-  State<DemoSearchBar> createState() => _DemoSearchBarState();
+  State<DropDownMenuShowcase> createState() => _DropDownMenuShowcaseState();
 }
 
-class _DemoSearchBarState extends State<DemoSearchBar> {
-  String? selectedColor;
-  List<ColorItem> searchHistory = <ColorItem>[];
-
-  Iterable<Widget> getHistoryList(SearchController controller) {
-    return searchHistory.map((ColorItem color) => ListTile(
-          leading: const Icon(Icons.history),
-          title: Text(color.label),
-          trailing: IconButton(
-              icon: const Icon(Icons.call_missed),
-              onPressed: () {
-                controller.text = color.label;
-                controller.selection =
-                    TextSelection.collapsed(offset: controller.text.length);
-              }),
-          onTap: () {
-            controller.closeView(color.label);
-            handleSelection(color);
-          },
-        ));
-  }
-
-  Iterable<Widget> getSuggestions(SearchController controller) {
-    final String input = controller.value.text;
-    return ColorItem.values
-        .where((ColorItem color) => color.label.contains(input))
-        .map((ColorItem filteredColor) => ListTile(
-              leading: CircleAvatar(backgroundColor: filteredColor.color),
-              title: Text(filteredColor.label),
-              trailing: IconButton(
-                  icon: const Icon(Icons.call_missed),
-                  onPressed: () {
-                    controller.text = filteredColor.label;
-                    controller.selection =
-                        TextSelection.collapsed(offset: controller.text.length);
-                  }),
-              onTap: () {
-                controller.closeView(filteredColor.label);
-                handleSelection(filteredColor);
-              },
-            ));
-  }
-
-  void handleSelection(ColorItem color) {
-    setState(() {
-      selectedColor = color.label;
-      if (searchHistory.length >= 5) {
-        searchHistory.removeLast();
-      }
-      searchHistory.insert(0, color);
-    });
-  }
-
+class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
+  String selectedItem = '';
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        SearchAnchor.bar(
-          barHintText: 'Search colors',
-          suggestionsBuilder:
-              (BuildContext context, SearchController controller) {
-            if (controller.text.isEmpty) {
-              if (searchHistory.isNotEmpty) {
-                return getHistoryList(controller);
-              }
-              return <Widget>[
-                const Center(
-                  child: Text('No search history.',
-                      style: TextStyle(color: Colors.grey)),
-                )
-              ];
-            }
-            return getSuggestions(controller);
-          },
+    return DropdownMenu<String>(
+      initialSelection: selectedItem,
+      onSelected: (String? value) {
+        setState(() {
+          selectedItem = value ?? 'one';
+        });
+      },
+      dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+        DropdownMenuEntry<String>(
+          label: 'Alarm settings',
+          leadingIcon: Icon(Icons.alarm),
+          value: 'one',
         ),
-        const SizedBox(height: 20),
-        if (selectedColor == null)
-          const Text('Select a color')
-        else
-          Text('Last selected color is $selectedColor')
+        DropdownMenuEntry<String>(
+          label: 'Disabled settings',
+          leadingIcon: Icon(Icons.settings),
+          value: 'two',
+          enabled: false,
+        ),
+        DropdownMenuEntry<String>(
+          label: 'Cabin overview',
+          leadingIcon: Icon(Icons.cabin),
+          value: 'three',
+        ),
+        DropdownMenuEntry<String>(
+          label: 'Surveillance view',
+          leadingIcon: Icon(Icons.camera_outdoor_rounded),
+          value: 'four',
+        ),
+        DropdownMenuEntry<String>(
+          label: 'Water alert',
+          leadingIcon: Icon(Icons.water_damage),
+          value: 'five',
+        ),
       ],
     );
   }
 }
 
-enum ColorItem {
-  red('red', Colors.red),
-  orange('orange', Colors.orange),
-  yellow('yellow', Colors.yellow),
-  green('green', Colors.green),
-  blue('blue', Colors.blue),
-  indigo('indigo', Colors.indigo),
-  violet('violet', Color(0xFF8F00FF)),
-  purple('purple', Colors.purple),
-  pink('pink', Colors.pink),
-  silver('silver', Color(0xFF808080)),
-  gold('gold', Color(0xFFFFD700)),
-  beige('beige', Color(0xFFF5F5DC)),
-  brown('brown', Colors.brown),
-  grey('grey', Colors.grey),
-  black('black', Colors.black),
-  white('white', Colors.white);
+class MenuBarShowcase extends StatelessWidget {
+  const MenuBarShowcase({super.key});
 
-  const ColorItem(this.label, this.color);
-  final String label;
-  final Color color;
+  @override
+  Widget build(BuildContext context) {
+    return MenuBar(
+      children: <Widget>[
+        SubmenuButton(
+          menuChildren: <Widget>[
+            MenuItemButton(
+              onPressed: () {
+                showAboutDialog(
+                  context: context,
+                  useRootNavigator: false,
+                  applicationName: 'MenuBar Demo',
+                  applicationVersion: '1.0.0',
+                );
+              },
+              child: const MenuAcceleratorLabel('&About'),
+            ),
+            SubmenuButton(
+              menuChildren: <Widget>[
+                MenuItemButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Saved!'),
+                      ),
+                    );
+                  },
+                  child: const MenuAcceleratorLabel('&Save now'),
+                ),
+                MenuItemButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Load!'),
+                      ),
+                    );
+                  },
+                  child: const MenuAcceleratorLabel('&Load now'),
+                ),
+              ],
+              child: const Text('File'),
+            ),
+            MenuItemButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Quit!'),
+                  ),
+                );
+              },
+              child: const MenuAcceleratorLabel('&Quit'),
+            ),
+          ],
+          child: const MenuAcceleratorLabel('&File'),
+        ),
+        SubmenuButton(
+          menuChildren: <Widget>[
+            MenuItemButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Bold!'),
+                  ),
+                );
+              },
+              child: const MenuAcceleratorLabel('&Bold'),
+            ),
+            MenuItemButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Italic!'),
+                  ),
+                );
+              },
+              child: const MenuAcceleratorLabel('&Italic'),
+            ),
+            MenuItemButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Underline!'),
+                  ),
+                );
+              },
+              child: const MenuAcceleratorLabel('&Underline'),
+            ),
+          ],
+          child: const MenuAcceleratorLabel('&Style'),
+        ),
+        SubmenuButton(
+          menuChildren: <Widget>[
+            const MenuItemButton(
+              onPressed: null,
+              child: MenuAcceleratorLabel('&Disabled item'),
+            ),
+            MenuItemButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Minify!'),
+                  ),
+                );
+              },
+              child: const MenuAcceleratorLabel('Mi&nify'),
+            ),
+          ],
+          child: const MenuAcceleratorLabel('&View'),
+        ),
+      ],
+    );
+  }
 }
 
 /// A Theme Settings class to bundle properties we want to modify on our
@@ -363,11 +360,11 @@ enum ColorItem {
 @immutable
 class ThemeSettings with Diagnosticable {
   final bool useMaterial3;
-  final bool useCustomTheme;
+  final bool useCustomMenu;
 
   const ThemeSettings({
     required this.useMaterial3,
-    required this.useCustomTheme,
+    required this.useCustomMenu,
   });
 
   /// Flutter debug properties override, includes toString.
@@ -375,19 +372,17 @@ class ThemeSettings with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3));
-    properties.add(DiagnosticsProperty<bool>('useCustomTheme', useCustomTheme));
+    properties.add(DiagnosticsProperty<bool>('useCustomMenu', useCustomMenu));
   }
 
   /// Copy the object with one or more provided properties changed.
   ThemeSettings copyWith({
     bool? useMaterial3,
-    bool? useCustomTheme,
-    bool? useIndicatorWidth,
-    bool? useTileHeight,
+    bool? useCustomMenu,
   }) {
     return ThemeSettings(
       useMaterial3: useMaterial3 ?? this.useMaterial3,
-      useCustomTheme: useCustomTheme ?? this.useCustomTheme,
+      useCustomMenu: useCustomMenu ?? this.useCustomMenu,
     );
   }
 
@@ -398,15 +393,218 @@ class ThemeSettings with Diagnosticable {
     if (other.runtimeType != runtimeType) return false;
     return other is ThemeSettings &&
         other.useMaterial3 == useMaterial3 &&
-        other.useCustomTheme == useCustomTheme;
+        other.useCustomMenu == useCustomMenu;
   }
 
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
         useMaterial3.hashCode,
-        useCustomTheme.hashCode,
+        useCustomMenu.hashCode,
       ]);
+}
+
+/// An enhanced enum to define the available menus and their shortcuts.
+///
+/// Using an enum for menu definition is not required, but this illustrates how
+/// they could be used for simple menu systems.
+enum MenuEntry {
+  about('About'),
+  showMessage(
+      'Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
+  hideMessage(
+      'Hide Message', SingleActivator(LogicalKeyboardKey.keyH, control: true)),
+  colorMenu('Color Menu'),
+  colorRed('Red', SingleActivator(LogicalKeyboardKey.keyR, control: true)),
+  colorGreen('Green', SingleActivator(LogicalKeyboardKey.keyG, control: true)),
+  colorBlue('Blue', SingleActivator(LogicalKeyboardKey.keyB, control: true));
+
+  const MenuEntry(this.label, [this.shortcut]);
+  final String label;
+  final MenuSerializableShortcut? shortcut;
+}
+
+class MenuAnchorContextMenu extends StatefulWidget {
+  const MenuAnchorContextMenu({super.key, required this.message});
+
+  final String message;
+
+  @override
+  State<MenuAnchorContextMenu> createState() => _MenuAnchorContextMenuState();
+}
+
+class _MenuAnchorContextMenuState extends State<MenuAnchorContextMenu> {
+  MenuEntry? _lastSelection;
+  final MenuController _menuController = MenuController();
+  ShortcutRegistryEntry? _shortcutsEntry;
+  bool get showingMessage => _showingMessage;
+  bool _showingMessage = false;
+  set showingMessage(bool value) {
+    if (_showingMessage != value) {
+      setState(() {
+        _showingMessage = value;
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Dispose of any previously registered shortcuts, since they are about to
+    // be replaced.
+    _shortcutsEntry?.dispose();
+    // Collect the shortcuts from the different menu selections so that they can
+    // be registered to apply to the entire app. Menus don't register their
+    // shortcuts, they only display the shortcut hint text.
+    final Map<ShortcutActivator, Intent> shortcuts =
+        <ShortcutActivator, Intent>{
+      for (final MenuEntry item in MenuEntry.values)
+        if (item.shortcut != null)
+          item.shortcut!: VoidCallbackIntent(() => _activate(item)),
+    };
+    // Register the shortcuts with the ShortcutRegistry.
+    final Map<ShortcutActivator, Intent>? entries =
+        ShortcutRegistry.maybeOf(context)?.shortcuts;
+    // Mod to avoid issue of entries being added multiple times, the dispose
+    // of them does not seem to work all the time. If this widget is used and
+    // potentially shown in many places, the only shortcut entries we should
+    // have are the same ones, if it exists and has not been disposed when
+    // this is called we can add it, if it exists it is the one we want already.
+    // We could also check for the specific entries, but for this workaround
+    // works for this demo. ShortcutRegistry is intended to be used as one
+    // global setting in the app, it should be higher up in the tree, then
+    // we would not have this issue if this widget is used in multiple views
+    // and potentially even shown one same screen.
+    if (entries?.isEmpty ?? false) {
+      _shortcutsEntry = ShortcutRegistry.of(context).addAll(shortcuts);
+    }
+  }
+
+  @override
+  void dispose() {
+    _shortcutsEntry?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      child: MenuAnchor(
+        controller: _menuController,
+        anchorTapClosesMenu: true,
+        menuChildren: <Widget>[
+          MenuItemButton(
+            child: Text(MenuEntry.about.label),
+            onPressed: () => _activate(MenuEntry.about),
+          ),
+          const MenuItemButton(
+            child: Text('Disabled item'),
+          ),
+          if (_showingMessage)
+            MenuItemButton(
+              onPressed: () => _activate(MenuEntry.hideMessage),
+              shortcut: MenuEntry.hideMessage.shortcut,
+              child: Text(MenuEntry.hideMessage.label),
+            ),
+          if (!_showingMessage)
+            MenuItemButton(
+              onPressed: () => _activate(MenuEntry.showMessage),
+              shortcut: MenuEntry.showMessage.shortcut,
+              child: Text(MenuEntry.showMessage.label),
+            ),
+          SubmenuButton(
+            menuChildren: <Widget>[
+              MenuItemButton(
+                onPressed: () => _activate(MenuEntry.colorRed),
+                shortcut: MenuEntry.colorRed.shortcut,
+                child: Text(MenuEntry.colorRed.label),
+              ),
+              MenuItemButton(
+                onPressed: () => _activate(MenuEntry.colorGreen),
+                shortcut: MenuEntry.colorGreen.shortcut,
+                child: Text(MenuEntry.colorGreen.label),
+              ),
+              MenuItemButton(
+                onPressed: () => _activate(MenuEntry.colorBlue),
+                shortcut: MenuEntry.colorBlue.shortcut,
+                child: Text(MenuEntry.colorBlue.label),
+              ),
+            ],
+            child: const Text('Color'),
+          ),
+        ],
+        child: Card(
+          margin: EdgeInsets.zero,
+          elevation: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text(
+                  'Click anywhere on this container to show the '
+                  'MenuAnchor context menu.',
+                  textAlign: TextAlign.center,
+                ),
+                const Text(
+                  'Menu keyboard shortcuts also work.',
+                  textAlign: TextAlign.center,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    showingMessage ? widget.message : '',
+                    style: theme.textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Text(
+                  _lastSelection != null
+                      ? 'Last Selected: ${_lastSelection!.label}'
+                      : '',
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _activate(MenuEntry selection) {
+    setState(() {
+      _lastSelection = selection;
+    });
+    switch (selection) {
+      case MenuEntry.about:
+        showAboutDialog(
+          context: context,
+          useRootNavigator: false,
+          applicationName: 'MenuAnchor Demo',
+          applicationVersion: '1.0.0',
+        );
+        break;
+      case MenuEntry.showMessage:
+      case MenuEntry.hideMessage:
+        showingMessage = !showingMessage;
+        break;
+      case MenuEntry.colorMenu:
+        break;
+      case MenuEntry.colorRed:
+        break;
+      case MenuEntry.colorGreen:
+        break;
+      case MenuEntry.colorBlue:
+        break;
+    }
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    _menuController.open(position: details.localPosition);
+  }
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
