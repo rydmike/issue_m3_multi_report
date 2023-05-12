@@ -1,26 +1,27 @@
-## Issue
+## (Material3) DatePicker date entry InputDecorator cannot have own theme
 
-When 
+If we add an `InputDecorationTheme` to the overall app theme, the `DatePicker` date entry picks it up, this is expected, but it may not be what we want. 
+
+We can not give it a separate themed date entry style, or even set it back to the default `InputDecorator` for the `DatePicker` only via a component theme. The `TimePicker` has an `InputDecorator` property in its theme where we can do that. The `DatePicker` also needs one.
+
+Run the attached sample to see the issue. 
+
+Keep the `InputDecoratorTheme` enabled, open the `DatePickerDialog` and switch to date entry mode. We can see it picking up the overall used custom `InputDecoratorTheme`. We cannot change it back on an app theme level, so it would use the default or some other preferred style.
+
+We can wrap the `DatePickerDialog` in an inherited `Theme` where we override the `InputDecorationTheme` for the `Theme` in that part of the widget tree where we have a `DatePicker`, but that is a very impractical solution and defeats theming an app overall to get a desired design.
 
 
 ## Expected results
 
-Expect 
+Expect to be able to use a custom overall app `InputDecorationTheme`, and have the `DatePicker` still use its default style, or another custom one, by assigning an override `InputDecorationTheme` to its `decorator` property in its component theme `DatePickerThemeData`.
 
-| Case A | Case B |
-|--------|--------|
-|        |        |
+
 
 ## Actual results
 
-Actual results 
+There is no `decorator` property in component theme `DatePickerThemeData`, we cannot control this style via a theme. 
 
-
-| Case A | Case B |
-|--------|--------|
-|        |        |
-
-## Proposal
+Additional rationale for adding a `decorator` property, the `TimePicker` has one. Expect feature parity between date and time pickers.
 
 
 ## Issue sample code
@@ -37,13 +38,12 @@ Actual results
 
 ## Used Flutter version
 
-Channel master, 3.9.0-20.0.pre.13
+Channel master, 3.11.0-5.0.pre.46
 
 <details>
-  <summary>Flutter doctor</summary>
+  <summary>Doctor output</summary>
 
-```
-
+```console
 flutter doctor -v
 [✓] Flutter (Channel master, 3.11.0-5.0.pre.46, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
     • Flutter version 3.11.0-5.0.pre.46 on channel master at /Users/rydmike/fvm/versions/master
@@ -93,7 +93,6 @@ flutter doctor -v
 
 [✓] Network resources
     • All expected network resources are available.
-
 
 ```
 

@@ -1,3 +1,67 @@
+### Is there an existing issue for this?
+
+- [X] I have searched the [existing issues](https://github.com/flutter/flutter/issues)
+- [X] I have read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+
+### Steps to reproduce
+
+When using `SearchAnchor.bar` we always get app the `InputDecorationTheme` applied on it.
+
+If we add a custom `InputDecorationTheme` to the overall app theme, the `SearchAnchor` input entry picks it up, we may not want this design on it.
+
+We can not give it a separate `InputDecorationTheme` style or set it back to default for the `SearchAnchor` only via its component theme(s), there are no input decorator properties. Even wrapping the `SearchAnchor` with a `Theme` using a default `const InputDecorationTheme()`, only removes it on the **SearchBar**, not on the **SearchView**.
+
+Run the included sample to see the issue with `SearchAnchor.bar` when using a custom `InputDecorationTheme`.
+
+
+### Expected results
+
+Expect the **SearchBar** and **SearchView** to not be impacted by overall app `InputDecorationTheme`, **or** to be able to style them back to desired style to look like the default, or to use its own custom design.
+
+Like, e.g. using their default look:
+
+
+| SearchBar | SearchView |
+|-----------|------------|
+| ![Screenshot 2023-05-12 at 3 50 53](https://github.com/flutter/flutter/assets/39990307/529abf81-b62a-483f-ad9c-d3c39121487f) | ![Screenshot 2023-05-12 at 3 51 13](https://github.com/flutter/flutter/assets/39990307/59e84efd-9ee9-4117-ba33-52d125ccd23f)|
+
+
+
+
+
+
+### Actual results
+
+If we add an app level custom `InputDecoratorTheme` the `SearchAnchor.bar` picks up the style. We may not want that on the SearchBar and SearchView, we might prefer the default there or another custom style.
+
+The `SearchBar` has code that attempts to get rid of borders, in the ambient theme of input decorator, but it does not remove all borders, so the ones used in this example will remain visible despite its attempt to remove.
+
+Even if we add a Theme wrapper (2nd SearchBar in the example) that gets rid of the app level themed `InputDecorator` on a new `Theme` in widget tree surrounding only the `SearchAnchor.bar`, it goes away on the **SearchBar** as expected, **but** it remains on the **SearchView** overlay despite this wrapper. The **SearchView** overlay must be in another context that we cannot impact by wrapping this part of the tree in a new `Theme`.
+
+
+| SearchBar | SearchView |
+|-----------|------------|
+| ![Screenshot 2023-05-12 at 3 51 31](https://github.com/flutter/flutter/assets/39990307/930cd87d-6e78-4892-bdb6-f64e8a9c75e0) | ![Screenshot 2023-05-12 at 3 51 45](https://github.com/flutter/flutter/assets/39990307/909b273a-ab6b-4660-b36e-3c7d4315d024) |
+
+
+### Proposal
+
+Both the **SearchBar** and the **SearchView**, need to have a `decorator` property with their own `InputDecoratorTheme`  in their component themes `SearchBarThemeData` and `SearchViewThemeData` that default to `const InputDecorationTheme()` when not specified. They should have a decorator in their widget properties as well.
+
+This would get rid of the **SearchBar** and the **SearchView** inheriting the decoration from the ambient `InputDecoratorTheme` and the need for trying and failing to remove e.g. borders and styling from it in current code. It would also add styling capability to Bar and View for any custom styling needs on widget and theme level.
+
+SearchBar trying and failing to remove its border decoration:
+
+https://github.com/flutter/flutter/blob/fa117aad283ba930a7a79b472843b19e52f543bd/packages/flutter/lib/src/material/search_anchor.dart#L1241
+
+because the decoration removal is incomplete. Other border props defined in the ambient theme in this example will leak through.
+
+
+### Code sample
+
+<details><summary>Code sample</summary>
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -688,3 +752,81 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+
+</details>
+
+
+### Screenshots or Video
+
+No additional media.
+
+
+### Logs
+
+No logs needed.
+
+### Flutter Doctor output
+
+#### Used Flutter version
+
+Channel master, 3.11.0-5.0.pre.46
+
+<details>
+  <summary>Doctor output</summary>
+
+```console
+flutter doctor -v
+[✓] Flutter (Channel master, 3.11.0-5.0.pre.46, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.11.0-5.0.pre.46 on channel master at /Users/rydmike/fvm/versions/master
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision fa117aad28 (3 hours ago), 2023-05-11 10:28:08 -0700
+    • Engine revision f38f46f66e
+    • Dart version 3.1.0 (build 3.1.0-94.0.dev)
+    • DevTools version 2.23.1
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly to perform
+      update checks and upgrades.
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.3)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14E222b
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+
+[✓] IntelliJ IDEA Community Edition (version 2023.1)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 73.0.4
+    • Dart plugin version 231.8109.91
+
+[✓] VS Code (version 1.77.3)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.62.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.2.1 22D68 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 113.0.5672.92
+
+[✓] Network resources
+    • All expected network resources are available.
+
+```
+
+</details>

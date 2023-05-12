@@ -22,6 +22,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+// Issue link: https://github.com/flutter/flutter/issues/126617
+
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
 // Make M3 ColorSchemes from a seed color.
@@ -43,26 +45,11 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
-    // No input decorator property in search bar theme.
-    searchBarTheme: const SearchBarThemeData(),
-    // No input decorator property in search view theme.
-    searchViewTheme: const SearchViewThemeData(),
-    //
-    // This theme pollutes the SearchBar and SearchView with a look we may not
-    // want on them, but we may otherwise want a custom input decoration.
-    // The SearchBar has code that attempts to get rid of borders, in app
-    // level input decorator but it does not remove all borders,
-    // so these will remain visible.
     inputDecorationTheme: settings.useCustomTheme
         ? InputDecorationTheme(
             fillColor: colorScheme.tertiaryContainer,
             filled: true,
             border: const UnderlineInputBorder(),
-            focusedBorder: const UnderlineInputBorder(),
-            enabledBorder: const UnderlineInputBorder(),
-            errorBorder: const UnderlineInputBorder(),
-            focusedErrorBorder: const UnderlineInputBorder(),
-            disabledBorder: const UnderlineInputBorder(),
           )
         : null,
   );
@@ -100,8 +87,8 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         child: Scaffold(
           appBar: AppBar(
             title: settings.useMaterial3
-                ? const Text("SearchAnchor gets Decorator theme (Material 3)")
-                : const Text("SearchAnchor gets Decorator theme (Material 2)"),
+                ? const Text("DatePicker cannot Theme Decorator (Material 3)")
+                : const Text("DatePicker cannot Theme Decorator (Material 2)"),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -182,17 +169,14 @@ class HomePage extends StatelessWidget {
         const Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(
-            "Using SearchAnchor we always get app InputDecorator theme.\n"
+            "The DatePicker's input decorator cannot be themed.\n"
             '\n'
             'If we add an InputDecorationTheme to the overall app theme, '
-            'the SearchAnchor input entry picks it up, we may not want this '
-            'design on it.\n'
-            '\n'
-            'We can not give it a separate InputDecorationTheme style or '
-            'set it back to default for the SearchAnchor only via a '
-            'component theme. Even wrapping the SearchAnchor with a '
-            'Theme using a default InputDecorator, only removes it on '
-            'the SearchBar, not on the SearchView.',
+            'the DatePicker date entry picks it up, we may not want that. '
+            'We can not give it a separate style or set it back to default '
+            'for the picker only via component theme. The TimePicker '
+            'has an InputDecorator property in its theme, the '
+            'DatePicker also needs one.',
           ),
         ),
         SwitchListTile(
@@ -202,37 +186,18 @@ class HomePage extends StatelessWidget {
             onSettings(settings.copyWith(useCustomTheme: value));
           },
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             children: [
-              const SizedBox(height: 8),
-              const TextField(
+              SizedBox(height: 8),
+              TextField(
                 decoration: InputDecoration(hintText: 'Themed text entry'),
               ),
-              const SizedBox(height: 16),
-              const Text('SearchAnchor with no theme, gets decorator theme'),
-              const Text('SearchAnchor has code attempt to remove it, '
-                  'but fails with some borders.'),
-              const DemoSearchBar(),
-              const SizedBox(height: 16),
-              const Text('SearchAnchor wrapped with Theme using default '
-                  'InputDecorator theme.'),
-              const Text('This removes decorator on SearchBar, but not '
-                  'on the view, click search to see it.'),
-              //
-              // This Theme wrapper gets rid of the app level InputDecorator
-              // on the SearchBar, but it remains on the SearchView overlay
-              // despite this wrapper. The SearchView must be in another
-              // context that we cannot even impact by wrapping this part
-              // of the tree in a new Theme.
-              //
-              Theme(
-                  data: Theme.of(context).copyWith(
-                      inputDecorationTheme: const InputDecorationTheme()),
-                  child: const DemoSearchBar()),
-              const SizedBox(height: 16),
-              const ShowColorSchemeColors(),
+              SizedBox(height: 16),
+              DatePickerDialogShowcase(),
+              SizedBox(height: 16),
+              ShowColorSchemeColors(),
             ],
           ),
         ),
@@ -241,119 +206,42 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class DemoSearchBar extends StatefulWidget {
-  const DemoSearchBar({super.key});
+class DatePickerDialogShowcase extends StatelessWidget {
+  const DatePickerDialogShowcase({super.key});
 
-  @override
-  State<DemoSearchBar> createState() => _DemoSearchBarState();
-}
-
-class _DemoSearchBarState extends State<DemoSearchBar> {
-  String? selectedColor;
-  List<ColorItem> searchHistory = <ColorItem>[];
-
-  Iterable<Widget> getHistoryList(SearchController controller) {
-    return searchHistory.map((ColorItem color) => ListTile(
-          leading: const Icon(Icons.history),
-          title: Text(color.label),
-          trailing: IconButton(
-              icon: const Icon(Icons.call_missed),
-              onPressed: () {
-                controller.text = color.label;
-                controller.selection =
-                    TextSelection.collapsed(offset: controller.text.length);
-              }),
-          onTap: () {
-            controller.closeView(color.label);
-            handleSelection(color);
-          },
-        ));
-  }
-
-  Iterable<Widget> getSuggestions(SearchController controller) {
-    final String input = controller.value.text;
-    return ColorItem.values
-        .where((ColorItem color) => color.label.contains(input))
-        .map((ColorItem filteredColor) => ListTile(
-              leading: CircleAvatar(backgroundColor: filteredColor.color),
-              title: Text(filteredColor.label),
-              trailing: IconButton(
-                  icon: const Icon(Icons.call_missed),
-                  onPressed: () {
-                    controller.text = filteredColor.label;
-                    controller.selection =
-                        TextSelection.collapsed(offset: controller.text.length);
-                  }),
-              onTap: () {
-                controller.closeView(filteredColor.label);
-                handleSelection(filteredColor);
-              },
-            ));
-  }
-
-  void handleSelection(ColorItem color) {
-    setState(() {
-      selectedColor = color.label;
-      if (searchHistory.length >= 5) {
-        searchHistory.removeLast();
-      }
-      searchHistory.insert(0, color);
-    });
+  Future<void> _openDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      useRootNavigator: false,
+      builder: (BuildContext context) => DatePickerDialog(
+        initialDate: DateTime.now(),
+        firstDate: DateTime(1930),
+        lastDate: DateTime(2050),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        SearchAnchor.bar(
-          barHintText: 'Search colors',
-          suggestionsBuilder:
-              (BuildContext context, SearchController controller) {
-            if (controller.text.isEmpty) {
-              if (searchHistory.isNotEmpty) {
-                return getHistoryList(controller);
-              }
-              return <Widget>[
-                const Center(
-                  child: Text('No search history.',
-                      style: TextStyle(color: Colors.grey)),
-                )
-              ];
-            }
-            return getSuggestions(controller);
-          },
+        AbsorbPointer(
+          child: DatePickerDialog(
+            initialDate: DateTime.now(),
+            firstDate: DateTime(1930),
+            lastDate: DateTime(2050),
+          ),
         ),
-        const SizedBox(height: 20),
-        if (selectedColor == null)
-          const Text('Select a color')
-        else
-          Text('Last selected color is $selectedColor')
+        TextButton(
+          child: const Text(
+            'Show DatePickerDialog',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          onPressed: () async => _openDialog(context),
+        ),
       ],
     );
   }
-}
-
-enum ColorItem {
-  red('red', Colors.red),
-  orange('orange', Colors.orange),
-  yellow('yellow', Colors.yellow),
-  green('green', Colors.green),
-  blue('blue', Colors.blue),
-  indigo('indigo', Colors.indigo),
-  violet('violet', Color(0xFF8F00FF)),
-  purple('purple', Colors.purple),
-  pink('pink', Colors.pink),
-  silver('silver', Color(0xFF808080)),
-  gold('gold', Color(0xFFFFD700)),
-  beige('beige', Color(0xFFF5F5DC)),
-  brown('brown', Colors.brown),
-  grey('grey', Colors.grey),
-  black('black', Colors.black),
-  white('white', Colors.white);
-
-  const ColorItem(this.label, this.color);
-  final String label;
-  final Color color;
 }
 
 /// A Theme Settings class to bundle properties we want to modify on our

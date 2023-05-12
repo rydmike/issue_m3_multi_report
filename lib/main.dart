@@ -22,7 +22,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// This issue reported here: https://github.com/flutter/flutter/issues/51715
+// See issue: https://github.com/flutter/flutter/issues/126623
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF6750A4);
@@ -45,6 +45,28 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
+    // No input decorator property in search bar theme.
+    searchBarTheme: const SearchBarThemeData(),
+    // No input decorator property in search view theme.
+    searchViewTheme: const SearchViewThemeData(),
+    //
+    // This theme pollutes the SearchBar and SearchView with a look we may not
+    // want on them, but we may otherwise want a custom input decoration.
+    // The SearchBar has code that attempts to get rid of borders, in app
+    // level input decorator but it does not remove all borders,
+    // so these will remain visible.
+    inputDecorationTheme: settings.useCustomTheme
+        ? InputDecorationTheme(
+            fillColor: colorScheme.tertiaryContainer,
+            filled: true,
+            border: const UnderlineInputBorder(),
+            focusedBorder: const UnderlineInputBorder(),
+            enabledBorder: const UnderlineInputBorder(),
+            errorBorder: const UnderlineInputBorder(),
+            focusedErrorBorder: const UnderlineInputBorder(),
+            disabledBorder: const UnderlineInputBorder(),
+          )
+        : null,
   );
 }
 
@@ -65,7 +87,7 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
   TextDirection textDirection = TextDirection.ltr;
   ThemeSettings settings = const ThemeSettings(
     useMaterial3: true,
-    useCustomTheme: false,
+    useCustomTheme: true,
   );
 
   @override
@@ -80,8 +102,8 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
         child: Scaffold(
           appBar: AppBar(
             title: settings.useMaterial3
-                ? const Text("Card elevation (Material 3)")
-                : const Text("Card elevation (Material 2)"),
+                ? const Text("SearchAnchor gets Decorator theme (Material 3)")
+                : const Text("SearchAnchor gets Decorator theme (Material 2)"),
             actions: [
               IconButton(
                 icon: settings.useMaterial3
@@ -119,6 +141,18 @@ class _IssueDemoAppState extends State<IssueDemoApp> {
                 settings = value;
               });
             },
+            longLabel: longLabel,
+            onLongLabel: (bool value) {
+              setState(() {
+                longLabel = value;
+              });
+            },
+            textDirection: textDirection,
+            onTextDirection: (TextDirection value) {
+              setState(() {
+                textDirection = value;
+              });
+            },
           ),
         ),
       ),
@@ -131,145 +165,197 @@ class HomePage extends StatelessWidget {
     super.key,
     required this.settings,
     required this.onSettings,
+    required this.longLabel,
+    required this.onLongLabel,
+    required this.textDirection,
+    required this.onTextDirection,
   });
   final ThemeSettings settings;
   final ValueChanged<ThemeSettings> onSettings;
+  final bool longLabel;
+  final ValueChanged<bool> onLongLabel;
+  final TextDirection textDirection;
+  final ValueChanged<TextDirection> onTextDirection;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      children: const [
-        Padding(
+      children: [
+        const Padding(
           padding: EdgeInsets.all(16.0),
-          child:
-              Text('Example of Card with Elevation, Opacity, Tint and Shadow.'),
+          child: Text(
+            "Using SearchAnchor we always get app InputDecorator theme.\n"
+            '\n'
+            'If we add an InputDecorationTheme to the overall app theme, '
+            'the SearchAnchor input entry picks it up, we may not want this '
+            'design on it.\n'
+            '\n'
+            'We can not give it a separate InputDecorationTheme style or '
+            'set it back to default for the SearchAnchor only via a '
+            'component theme. Even wrapping the SearchAnchor with a '
+            'Theme using a default InputDecorator, only removes it on '
+            'the SearchBar, not on the SearchView.',
+          ),
         ),
-        SizedBox(height: 16),
-        CardShowCase(),
-        SizedBox(height: 16),
+        SwitchListTile(
+          title: const Text('Enable InputDecorationTheme'),
+          value: settings.useCustomTheme,
+          onChanged: (bool value) {
+            onSettings(settings.copyWith(useCustomTheme: value));
+          },
+        ),
         Padding(
-          padding: EdgeInsets.all(16.0),
-          child: ShowColorSchemeColors(),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+              const TextField(
+                decoration: InputDecoration(hintText: 'Themed text entry'),
+              ),
+              const SizedBox(height: 16),
+              const Text('SearchAnchor with no theme, gets decorator theme'),
+              const Text('SearchAnchor has code attempt to remove it, '
+                  'but fails with some borders.'),
+              const DemoSearchBar(),
+              const SizedBox(height: 16),
+              const Text('SearchAnchor wrapped with Theme using default '
+                  'InputDecorator theme.'),
+              const Text('This removes decorator on SearchBar, but not '
+                  'on the view, click search to see it.'),
+              //
+              // This Theme wrapper gets rid of the app level InputDecorator
+              // on the SearchBar, but it remains on the SearchView overlay
+              // despite this wrapper. The SearchView must be in another
+              // context that we cannot even impact by wrapping this part
+              // of the tree in a new Theme.
+              //
+              Theme(
+                  data: Theme.of(context).copyWith(
+                      inputDecorationTheme: const InputDecorationTheme()),
+                  child: const DemoSearchBar()),
+              const SizedBox(height: 16),
+              const ShowColorSchemeColors(),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
-class CardShowCase extends StatefulWidget {
-  const CardShowCase({super.key});
+class DemoSearchBar extends StatefulWidget {
+  const DemoSearchBar({super.key});
 
   @override
-  State<CardShowCase> createState() => _CardShowCaseState();
+  State<DemoSearchBar> createState() => _DemoSearchBarState();
 }
 
-class _CardShowCaseState extends State<CardShowCase> {
-  double opacity = 0.5;
-  double elevation = 4;
-  bool isTinted = false;
-  bool hasShadow = true;
+class _DemoSearchBarState extends State<DemoSearchBar> {
+  String? selectedColor;
+  List<ColorItem> searchHistory = <ColorItem>[];
+
+  Iterable<Widget> getHistoryList(SearchController controller) {
+    return searchHistory.map((ColorItem color) => ListTile(
+          leading: const Icon(Icons.history),
+          title: Text(color.label),
+          trailing: IconButton(
+              icon: const Icon(Icons.call_missed),
+              onPressed: () {
+                controller.text = color.label;
+                controller.selection =
+                    TextSelection.collapsed(offset: controller.text.length);
+              }),
+          onTap: () {
+            controller.closeView(color.label);
+            handleSelection(color);
+          },
+        ));
+  }
+
+  Iterable<Widget> getSuggestions(SearchController controller) {
+    final String input = controller.value.text;
+    return ColorItem.values
+        .where((ColorItem color) => color.label.contains(input))
+        .map((ColorItem filteredColor) => ListTile(
+              leading: CircleAvatar(backgroundColor: filteredColor.color),
+              title: Text(filteredColor.label),
+              trailing: IconButton(
+                  icon: const Icon(Icons.call_missed),
+                  onPressed: () {
+                    controller.text = filteredColor.label;
+                    controller.selection =
+                        TextSelection.collapsed(offset: controller.text.length);
+                  }),
+              onTap: () {
+                controller.closeView(filteredColor.label);
+                handleSelection(filteredColor);
+              },
+            ));
+  }
+
+  void handleSelection(ColorItem color) {
+    setState(() {
+      selectedColor = color.label;
+      if (searchHistory.length >= 5) {
+        searchHistory.removeLast();
+      }
+      searchHistory.insert(0, color);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final Color cardColor = Colors.red;
-
     return Column(
       children: <Widget>[
-        ListTile(
-          title: const Text('Opacity'),
-          subtitle: Slider(
-            min: 0.0,
-            max: 1.0,
-            value: opacity,
-            label: opacity.toStringAsFixed(3),
-            onChanged: (double newValue) {
-              setState(() {
-                opacity = newValue;
-              });
-            },
-          ),
-          trailing: Text(opacity.toStringAsFixed(3)),
-        ),
-        ListTile(
-          title: const Text('Elevation'),
-          subtitle: Slider(
-            min: 0.0,
-            max: 20.0,
-            value: elevation,
-            label: elevation.toStringAsFixed(3),
-            onChanged: (double newValue) {
-              setState(() {
-                elevation = newValue;
-              });
-            },
-          ),
-          trailing: Text(elevation.toStringAsFixed(3)),
-        ),
-        SwitchListTile(
-          title: const Text('Is tinted?'),
-          value: isTinted,
-          onChanged: (bool newValue) {
-            setState(() {
-              isTinted = newValue;
-            });
+        SearchAnchor.bar(
+          barHintText: 'Search colors',
+          suggestionsBuilder:
+              (BuildContext context, SearchController controller) {
+            if (controller.text.isEmpty) {
+              if (searchHistory.isNotEmpty) {
+                return getHistoryList(controller);
+              }
+              return <Widget>[
+                const Center(
+                  child: Text('No search history.',
+                      style: TextStyle(color: Colors.grey)),
+                )
+              ];
+            }
+            return getSuggestions(controller);
           },
         ),
-        SwitchListTile(
-          title: const Text('Has shadow?'),
-          value: hasShadow,
-          onChanged: (bool newValue) {
-            setState(() {
-              hasShadow = newValue;
-            });
-          },
-        ),
-        Wrap(
-          spacing: 20,
-          children: [
-            Card(
-              elevation: 0,
-              color: cardColor.withOpacity(opacity),
-              surfaceTintColor: isTinted ? null : Colors.transparent,
-              shadowColor: hasShadow ? null : Colors.transparent,
-              child: const SizedBox(
-                width: 150,
-                height: 150,
-                child: Center(
-                  child: Text('Card\nElevation 0'),
-                ),
-              ),
-            ),
-            Card(
-              elevation: elevation,
-              color: cardColor.withOpacity(opacity),
-              surfaceTintColor: isTinted ? null : Colors.transparent,
-              shadowColor: hasShadow ? null : Colors.transparent,
-              child: SizedBox(
-                width: 150,
-                height: 150,
-                child: Center(
-                  child:
-                      Text('Card\nElevation\n${elevation.toStringAsFixed(3)}'),
-                ),
-              ),
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: cardColor.withOpacity(opacity),
-              ),
-              child: const SizedBox(
-                width: 150,
-                height: 150,
-                child: Center(
-                  child: Text('DecoratedBox\nElevation 0'),
-                ),
-              ),
-            ),
-          ],
-        ),
+        const SizedBox(height: 20),
+        if (selectedColor == null)
+          const Text('Select a color')
+        else
+          Text('Last selected color is $selectedColor')
       ],
     );
   }
+}
+
+enum ColorItem {
+  red('red', Colors.red),
+  orange('orange', Colors.orange),
+  yellow('yellow', Colors.yellow),
+  green('green', Colors.green),
+  blue('blue', Colors.blue),
+  indigo('indigo', Colors.indigo),
+  violet('violet', Color(0xFF8F00FF)),
+  purple('purple', Colors.purple),
+  pink('pink', Colors.pink),
+  silver('silver', Color(0xFF808080)),
+  gold('gold', Color(0xFFFFD700)),
+  beige('beige', Color(0xFFF5F5DC)),
+  brown('brown', Colors.brown),
+  grey('grey', Colors.grey),
+  black('black', Colors.black),
+  white('white', Colors.white);
+
+  const ColorItem(this.label, this.color);
+  final String label;
+  final Color color;
 }
 
 /// A Theme Settings class to bundle properties we want to modify on our
