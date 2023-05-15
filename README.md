@@ -23,5 +23,6 @@ The following issues have their reproduction code sample, and also the original 
 - (17) [DatePicker - Cannot remove or style hard coded Divider in M3](https://github.com/flutter/flutter/issues/126597)
 - (18) [(Material) DatePicker - date entry InputDecorator cannot have own theme](https://github.com/flutter/flutter/issues/126617)
 - (19) [DatePicker - M2 and M3 theme defaults principle deviates from other widgets (Not yet reported)]
+- (20) [GoogleFonts TextTheme has M2 light mode color defined](https://github.com/material-foundation/flutter-packages/issues/401)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.

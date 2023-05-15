@@ -1,3 +1,110 @@
+### Package
+
+google_fonts
+
+### Existing issue?
+
+- [X] I checked the [existing issues](https://github.com/material-foundation/flutter-packages/issues)
+
+### What happened?
+
+## GoogleFonts TextTheme Color defined to always use M2 light mode color
+
+GoogleFonts TextTheme have their TextStyle colors hard coded to M2 light mode colors.
+
+When using a GoogleFonts text theme, like e.g. `GoogleFonts.notoSansTextTheme()` it always comes with the colors from `ThemeData.light().textTheme` baked in as default color.
+
+These TextTheme colors are only appropriate in `ThemeData(textTheme: ..., ...)` for M2 light mode. They are wrong default colors for all other modes, like dark M2, light or dark M3 and primaryTextTheme. Thus, when used for such cases as `TextTheme` in `ThemeData`, the colors have to be overridden for every TextStyle in the TextTheme to get mode correct or even usable contrast color.
+
+If the used `TextStyle` colors in all the GoogleFonts TextThemes were null, `ThemeData` would add M2/M3 mode and light/dark appropriate colors to the GoogleFonts TextThemes when used in a theme.
+
+The GoogleFonts TextThemes already have **NO font sizes defined**, since `ThemeData.light().textTheme` used as default does not yet resolve sizes, they are all null and get applied later in the localization step, this fact gives us M2/M3 mode correct sizes, but not colors.
+
+Letting `Color` remain null in all `GoogleFonts` text themes and be applied by `ThemeData` to appropriate colors would be similar behavior for color and make the default GoogleFonts TextTheme get correct M2 (opacity based) based contrast colors in M2 and M3 (onSurface based) colors in M3 mode as well as correct contrast colors for light/dark mode.
+
+Even when use as `primaryTextTheme` color would be resolved based on `ThemeData` modes, with the known issue and limitation `primaryTextTheme` has see Flutter [issue #118146](https://github.com/flutter/flutter/issues/118146).
+
+
+Build the attached sample app to see the result. Toggle the switch ON to see expected results, keep OFF to see issues as presented below.
+
+
+### Expected results
+
+Expect to get M2/M3 mode and light/dark mode correct contrast color on the text when using `GoogleFonts` as `TextTheme` in `ThemeData` when used as `textTheme` and `primaryTextTheme`.
+
+| M3 light | M3 dark |
+|----------|---------|
+| ![Screenshot 2023-05-15 at 6 05 42](https://github.com/material-foundation/flutter-packages/assets/39990307/8419824d-755d-47a0-b1da-67e40f88e620) | ![Screenshot 2023-05-15 at 6 06 08](https://github.com/material-foundation/flutter-packages/assets/39990307/2f6cf646-765f-4d75-95b8-6d6d1a45d5fc) |
+
+
+| M2 light  | M2 dark   |
+|-----------|-----------|
+| ![Screenshot 2023-05-15 at 6 06 38](https://github.com/material-foundation/flutter-packages/assets/39990307/a090c199-04f1-4c39-b32e-fb8f19e0f3c5) | ![Screenshot 2023-05-15 at 6 07 05](https://github.com/material-foundation/flutter-packages/assets/39990307/e2c98e1e-e739-420b-8326-7e244c933751) |
+
+> **NOTE:** The dark mode `primaryTextTheme` above have wrong contrast colors, but that is due to unrelated `ThemeData` [issue #118146](https://github.com/flutter/flutter/issues/118146).
+
+
+### Actual results
+
+| M3 light | M3 dark |
+|----------|---------|
+| ![Screenshot 2023-05-15 at 6 07 49](https://github.com/material-foundation/flutter-packages/assets/39990307/8271401b-f39b-4822-a893-cfd7e9ea0909) | ![Screenshot 2023-05-15 at 6 08 14](https://github.com/material-foundation/flutter-packages/assets/39990307/be0051e8-cb20-4cad-ac7e-7c851c1b25ee) |
+
+In M3 light mode, the `textTheme` colors get M2 light mode based colors with its different opacities for different styles. This is incorrect, they should all be `onSurface` color with no opacity.
+
+The `primaryTextTheme` is also M2 light mode text theme based, not only is it incorrect, it is also incorrect contrast for the used `primary` color.
+
+In M3 dark mode, the same M2 light mode colors are used, they are not usable at all as colors on a dark mode `textTheme`.
+
+Ironically, in dark mode, the light M2 theme mode font colors happen to work better on `primary` color than what `ThemeData` actually makes when colors are null. As mentioned, the reason for this is [issue #118146](https://github.com/flutter/flutter/issues/118146) and unrelated to this case.
+
+| M2 light  | M2 dark   |
+|-----------|-----------|
+| ![Screenshot 2023-05-15 at 6 09 00](https://github.com/material-foundation/flutter-packages/assets/39990307/8bed0490-3d99-4154-82c4-5e1b92544a8b) | ![Screenshot 2023-05-15 at 6 09 22](https://github.com/material-foundation/flutter-packages/assets/39990307/be50c440-e902-4a2e-866d-aba1b9256659) |
+
+
+In M2 light mode, the colors are actually correct for `textTheme`.
+> Well for `Typography2014` anyway, I don't remember if it is actually correct for M2 `Typography2018` as well, or if 2018 changed any of the opacities used from 2014. I seem to recall they did not, it was just font sizes and some letter spacing. In this example that uses just vanilla `ThemeData` we get the very old `Typography2014` that actually don't use correct M2 sizes and letter spacing, but if we were to change to `Typography2018` we would get the correct M2 sizes. So that part works, but colors would remain with 2014 opacities, but as I recall, they are the same as 2018, so they are most likely correct "by accident".
+
+
+In M2 dark mode, the `textTheme` uses the M2 light mode colors, and they are of course not legible at all. Again, in this case due mentioned unrelated issue, the dark mode `primaryTextTheme` is better than what `ThemeData` would actually make if colors were null.
+
+
+### Proposal
+
+Keep `color` null in all returned GoogleFonts TextThemes and all their TextStyles, and let `ThemeData` apply appropriate default colors. Users can still apply their own colors as needed.
+
+The change is potentially breaking, but it makes `GoogleFonts` default TextThemes better in all `ThemeData` modes in Flutter. Importantly, it also gives us correct M3 mode font colors by default when we use M3.
+
+Currently, I'm using a version of the fix presented in the attached sample in FlexColorScheme. As seen, I found a "reasonably" safe way to check when a given passed `TextTheme` is using a default GoogleFonts TextTheme, and only set colors to null then. It would be nice to not need this workaround. but I can of course continue to use it. Still it might also be nice to not have all users of GoogleFonts that use vanilla `ThemeData` struggle with this issue.
+
+### Issue sample code
+
+The reproduction sample code is attached below.
+
+#### Sample build requirements
+
+Add GoogleFonts to pubspec yaml.
+
+
+```yaml
+dependencies:
+  google_fonts: ^4.0.4
+```
+
+If using **macOS** add:
+
+```xml
+<key>com.apple.security.network.client</key>
+<true/>
+```
+To at least the macOS debug mode entitlements file.
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -812,3 +919,76 @@ class TextThemeColor {
     );
   }
 }
+
+```
+
+</details>
+
+
+
+
+
+
+### Used versions
+
+* Flutter Channel stable, 3.10.0
+* GoogleFonts 4.0.4
+
+### Relevant log output
+
+<details>
+  <summary>Flutter doctor</summary>
+
+```console
+flutter doctor -v
+[v] Flutter (Channel stable, 3.10.0, on macOS 13.2.1 22D68 darwin-arm64, locale en-US)
+    • Flutter version 3.10.0 on channel stable at /Users/rydmike/fvm/versions/stable
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 84a1e904f4 (6 days ago), 2023-05-09 07:41:44 -0700
+    • Engine revision d44b5a94c9
+    • Dart version 3.0.0
+    • DevTools version 2.23.1
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.3)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14E222b
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.1)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.15+0-b2043.56-8887301)
+
+[✓] IntelliJ IDEA Community Edition (version 2023.1)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 73.0.4
+    • Dart plugin version 231.8109.91
+
+[✓] VS Code (version 1.77.3)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.62.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.2.1 22D68 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 113.0.5672.92
+
+[✓] Network resources
+    • All expected network resources are available.
+
+```
+
+</details>
+
