@@ -76,6 +76,8 @@ Keep `color` null in all returned GoogleFonts TextThemes and all their TextStyle
 
 The change is potentially breaking, but it makes `GoogleFonts` default TextThemes better in all `ThemeData` modes in Flutter. Importantly, it also gives us correct M3 mode font colors by default when we use M3.
 
+If the **hard coded** M2 light mode colors for some reason are critical in the current `TextThemes` returned by `GoogleFonts`, maybe consider adding another new `TextTheme` getter where all `TextStyle` colors are null. This, as a more suitable optional/new default `TextTheme` more usable and suitable for `ThemeData` consumption.
+
 Currently, I'm using a version of the fix presented in the attached sample in FlexColorScheme. As seen, I found a "reasonably" safe way to check when a given passed `TextTheme` is using a default GoogleFonts TextTheme, and only set colors to null then. It would be nice to not need this workaround. but I can of course continue to use it. Still it might also be nice to not have all users of GoogleFonts that use vanilla `ThemeData` struggle with this issue.
 
 ### Issue sample code
@@ -170,7 +172,7 @@ TextTheme? makeGoogleFontsTextThemeColorsNull(final TextTheme? textTheme) {
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
 
   final TextTheme textTheme = GoogleFonts.notoSansTextTheme();
   final TextTheme primaryTextTheme = GoogleFonts.robotoCondensedTextTheme();
@@ -286,32 +288,32 @@ class HomePage extends StatelessWidget {
           padding: EdgeInsets.all(16.0),
           child: Text(
             'GoogleFonts TextTheme have hard coded to M2 light mode colors.\n'
-            '\n'
-            'When using a GoogleFonts text theme, like e.g. '
-            'GoogleFonts.notoSansTextTheme() it always comes with the colors '
-            'from ThemeData.light().textTheme baked in as default color.\n'
-            '\n'
-            'These TextTheme colors are only appropriate in '
-            'ThemeData(textTheme: ...) '
-            'for M2 light mode. They are wrong default colors for all other'
-            'modes, dark M2, light/dark M3 and primaryTextTheme. Thus when '
-            'used for such cases as TextTheme in ThemeData, the colors '
-            'have to be overridden for every TextStyle in the TextTheme to '
-            'get mode correct or even usable contrast color.'
-            '\n'
-            'If the used TextStyle colors in all the GoogleFonts TextThemes '
-            'were null, '
-            'ThemeData would add M2/M3 mode and light/dark appropriate colors '
-            'to the GoogleFonts TextThemes when used in a theme.\n'
-            '\n'
-            'The GoogleFonts TextThemes already have NO font sizes defined, '
-            'since ThemeData.light().textTheme used as default does not '
-            'yet resolve sizes, they are all null and get applied later in '
-            'localization step. Letting Color be applied by ThemeData to '
-            'appropriate colors would be similar behavior for color and '
-            'make the default GoogleFonts TextTheme get correct M2 '
-            '(opacity based)/M3 (onSurface based) colors in respective '
-            'mode as well as correct contrast colors for light/dark mode.',
+                '\n'
+                'When using a GoogleFonts text theme, like e.g. '
+                'GoogleFonts.notoSansTextTheme() it always comes with the colors '
+                'from ThemeData.light().textTheme baked in as default color.\n'
+                '\n'
+                'These TextTheme colors are only appropriate in '
+                'ThemeData(textTheme: ...) '
+                'for M2 light mode. They are wrong default colors for all other'
+                'modes, dark M2, light/dark M3 and primaryTextTheme. Thus when '
+                'used for such cases as TextTheme in ThemeData, the colors '
+                'have to be overridden for every TextStyle in the TextTheme to '
+                'get mode correct or even usable contrast color.'
+                '\n'
+                'If the used TextStyle colors in all the GoogleFonts TextThemes '
+                'were null, '
+                'ThemeData would add M2/M3 mode and light/dark appropriate colors '
+                'to the GoogleFonts TextThemes when used in a theme.\n'
+                '\n'
+                'The GoogleFonts TextThemes already have NO font sizes defined, '
+                'since ThemeData.light().textTheme used as default does not '
+                'yet resolve sizes, they are all null and get applied later in '
+                'localization step. Letting Color be applied by ThemeData to '
+                'appropriate colors would be similar behavior for color and '
+                'make the default GoogleFonts TextTheme get correct M2 '
+                '(opacity based)/M3 (onSurface based) colors in respective '
+                'mode as well as correct contrast colors for light/dark mode.',
           ),
         ),
         SwitchListTile(
@@ -456,9 +458,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomTheme.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    useCustomTheme.hashCode,
+  ]);
 }
 
 class TextThemeShowcase extends StatelessWidget {
@@ -491,84 +493,84 @@ class TextThemeColumnShowcase extends StatelessWidget {
       children: <Widget>[
         Text('Font: ${textTheme.titleSmall!.fontFamily}',
             style:
-                textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
+            textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
         Text(
           'Display Large '
-          '(${textTheme.displayLarge!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.displayLarge!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.displayLarge,
         ),
         Text(
           'Display Medium '
-          '(${textTheme.displayMedium!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.displayMedium!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.displayMedium,
         ),
         Text(
           'Display Small '
-          '(${textTheme.displaySmall!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.displaySmall!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.displaySmall,
         ),
         const SizedBox(height: 12),
         Text(
           'Headline Large '
-          '(${textTheme.headlineLarge!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.headlineLarge!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.headlineLarge,
         ),
         Text(
           'Headline Medium '
-          '(${textTheme.headlineMedium!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.headlineMedium!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.headlineMedium,
         ),
         Text(
           'Headline Small '
-          '(${textTheme.headlineSmall!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.headlineSmall!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.headlineSmall,
         ),
         const SizedBox(height: 12),
         Text(
           'Title Large '
-          '(${textTheme.titleLarge!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.titleLarge!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.titleLarge,
         ),
         Text(
           'Title Medium '
-          '(${textTheme.titleMedium!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.titleMedium!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.titleMedium,
         ),
         Text(
           'Title Small '
-          '(${textTheme.titleSmall!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.titleSmall!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.titleSmall,
         ),
         const SizedBox(height: 12),
         Text(
           'Body Large '
-          '(${textTheme.bodyLarge!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.bodyLarge!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.bodyLarge,
         ),
         Text(
           'Body Medium '
-          '(${textTheme.bodyMedium!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.bodyMedium!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.bodyMedium,
         ),
         Text(
           'Body Small '
-          '(${textTheme.bodySmall!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.bodySmall!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.bodySmall,
         ),
         const SizedBox(height: 12),
         Text(
           'Label Large '
-          '(${textTheme.labelLarge!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.labelLarge!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.labelLarge,
         ),
         Text(
           'Label Medium '
-          '(${textTheme.labelMedium!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.labelMedium!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.labelMedium,
         ),
         Text(
           'Label Small '
-          '(${textTheme.labelSmall!.fontSize!.toStringAsFixed(0)})',
+              '(${textTheme.labelSmall!.fontSize!.toStringAsFixed(0)})',
           style: textTheme.labelSmall,
         ),
       ],
