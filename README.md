@@ -22,8 +22,9 @@ The following issues have their reproduction code sample, and also the original 
 - (16) [(Web) ThemeData ColorScheme wobble when there is no value change (Not yet reported)]
 - (17) [DatePicker - Cannot remove or style hard coded Divider in M3](https://github.com/flutter/flutter/issues/126597)
 - (18) [(Material) DatePicker - date entry InputDecorator cannot have own theme](https://github.com/flutter/flutter/issues/126617)
-- (19) [DatePicker - M2 and M3 theme defaults principle deviates from other widgets (Not yet reported)]
+- (19) [DatePicker - M2 and M3 theme defaults principle deviates from other widgets, not own issue, but mentioned here](https://github.com/flutter/flutter/issues/130135)
 - (20) [GoogleFonts TextTheme has M2 light mode color defined](https://github.com/material-foundation/flutter-packages/issues/401)
 - (21) [(Material) AppBar scroll under color change does not animate (Not yet reported)]
+- (22) [(Material) Checkbox theme regression](https://github.com/flutter/flutter/issues/130295)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.

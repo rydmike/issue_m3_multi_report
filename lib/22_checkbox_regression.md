@@ -1,3 +1,40 @@
+## Checkbox theme regression
+
+The **Checkbox** component has a theme regression when comparing Flutter stable **3.10.5** (and earlier versions) with latest master channel (3.12.0-15.0.pre.74).
+
+
+## Expected results
+
+When using an elaborate custom `Checkbox` theme on stable channel, with different optional settings giving us these themed results in **stable 3.10.5 channel**, we EXPECT the themed results to be identical on **master** channel.
+
+| No theme | Theme A | Theme B | Theme C |
+|----------|---------|---------|---------|
+|          |         |         |         |
+
+## Actual results
+
+The actual results on **master** channel are radically different as seen below.
+
+
+| No theme | Theme A | Theme B | Theme C |
+|----------|---------|---------|---------|
+|          |         |         |         |
+
+## Cause
+
+This PR causes the BREAKING changes: https://github.com/flutter/flutter/pull/125643 
+
+## Proposal
+
+Instead of breaking past `fillColor` behavior, consider introducing new `backgroundColor` and `outlineColor` that cannot be used together with `fillColor`. The `fillColor` can then be deprecated and removed in a more controlled manner instead of instant breakage.
+
+## Issue sample code
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -22,7 +59,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// This issue reported here: https://github.com/flutter/flutter/issues/130295
+// This issue reported here:
 
 // ***************************************************************************
 // THESE styling constants and functions below are not important for the issue
@@ -114,7 +151,7 @@ extension FlexColorExtensions on Color {
 Color tintedDisabled(Color overlay, Color tint) =>
 // Tint color alpha blend into overlay #66=40%
 // Opacity of result #61=38%, same as M3 opacity on disable.
-    overlay.blendAlpha(tint, kTintDisabled).withAlpha(kAlphaDisabled);
+overlay.blendAlpha(tint, kTintDisabled).withAlpha(kAlphaDisabled);
 
 /// Returns the FCS opinionated tinted hover color on an overlay color.
 ///
@@ -164,19 +201,19 @@ double tintAlphaFactor(Color color, Brightness mode,
   if (mode == Brightness.light) {
     return surfaceMode
         ? ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? 1.5
-            : 4.0
+        ? 1.5
+        : 4.0
         : ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? 5.0
-            : 2.0;
+        ? 5.0
+        : 2.0;
   } else {
     return surfaceMode
         ? ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? 5.0
-            : 2.0
+        ? 5.0
+        : 2.0
         : ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? 5.0
-            : 4.0;
+        ? 5.0
+        : 4.0;
   }
 }
 
@@ -214,144 +251,144 @@ ThemeData theme(Brightness brightness, ThemeSettings settings) {
     visualDensity: VisualDensity.standard,
     checkboxTheme: useCustomCheck
         ? CheckboxThemeData(
-            checkColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                if (useM3) {
-                  if (states.contains(MaterialState.disabled)) {
-                    if (states.contains(MaterialState.selected)) {
-                      return colorScheme.surface;
-                    }
-                    return Colors.transparent;
-                  }
-                  if (states.contains(MaterialState.selected)) {
-                    if (states.contains(MaterialState.error)) {
-                      return colorScheme.onError;
-                    }
-                    return onBaseColor;
-                  }
-                  return Colors.transparent;
-                } else {
-                  if (states.contains(MaterialState.disabled)) {
-                    return isLight
-                        ? Colors.grey.shade200
-                        : Colors.grey.shade900;
-                  }
-                  if (states.contains(MaterialState.selected)) {
-                    return onBaseColor;
-                  }
-                  return isLight ? Colors.grey.shade50 : Colors.grey.shade400;
-                }
-              },
-            ),
-            fillColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                if (useM3) {
-                  if (states.contains(MaterialState.disabled)) {
-                    if (tintedDisable) {
-                      return tintedDisabled(colorScheme.onSurface, baseColor);
-                    }
-                    return colorScheme.onSurface.withAlpha(kAlphaDisabled);
-                  }
-                  if (states.contains(MaterialState.error)) {
-                    return colorScheme.error;
-                  }
-                  if (states.contains(MaterialState.selected)) {
-                    return baseColor;
-                  }
-                  if (states.contains(MaterialState.pressed)) {
-                    if (coloredUnselected) return baseColor;
-                    return colorScheme.onSurface;
-                  }
-                  if (states.contains(MaterialState.hovered)) {
-                    if (coloredUnselected) return baseColor;
-                    return colorScheme.onSurface;
-                  }
-                  if (states.contains(MaterialState.focused)) {
-                    if (coloredUnselected) return baseColor;
-                    return colorScheme.onSurface;
-                  }
-                  if (coloredUnselected) {
-                    return baseColor.withAlpha(kAlphaUnselect);
-                  }
-                  return colorScheme.onSurfaceVariant;
-                } else {
-                  if (states.contains(MaterialState.disabled)) {
-                    if (tintedDisable) {
-                      return tintedDisabled(colorScheme.onSurface, baseColor);
-                    }
-                    return isLight
-                        ? Colors.grey.shade400
-                        : Colors.grey.shade800;
-                  }
-                  if (states.contains(MaterialState.selected)) {
-                    return baseColor;
-                  }
-                  // Opinionated color on unselected checkbox.
-                  if (coloredUnselected) {
-                    return baseColor.withAlpha(kAlphaUnselect);
-                  }
-                  // This is M2 SDK default.
-                  return isLight ? Colors.black54 : Colors.white70;
-                }
-              },
-            ),
-            overlayColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                // Error state only exists in M3 mode.
-                if (states.contains(MaterialState.error) && useM3) {
-                  if (states.contains(MaterialState.pressed)) {
-                    return colorScheme.error.withAlpha(kAlphaPressed);
-                  }
-                  if (states.contains(MaterialState.hovered)) {
-                    return colorScheme.error.withAlpha(kAlphaHovered);
-                  }
-                  if (states.contains(MaterialState.focused)) {
-                    return colorScheme.error.withAlpha(kAlphaFocused);
-                  }
-                }
-                if (states.contains(MaterialState.selected)) {
-                  if (states.contains(MaterialState.pressed)) {
-                    if (tintedInteract) {
-                      return tintedPressed(overlay, tint, factor);
-                    }
-                    return colorScheme.onSurface.withAlpha(kAlphaPressed);
-                  }
-                  if (states.contains(MaterialState.hovered)) {
-                    if (tintedInteract) {
-                      return tintedHovered(overlay, tint, factor);
-                    }
-                    return baseColor.withAlpha(kAlphaHovered);
-                  }
-                  if (states.contains(MaterialState.focused)) {
-                    if (tintedInteract) {
-                      return tintedFocused(overlay, tint, factor);
-                    }
-                    return baseColor.withAlpha(kAlphaFocused);
-                  }
-                  return Colors.transparent;
-                }
-                if (states.contains(MaterialState.pressed)) {
-                  if (tintedInteract) {
-                    return tintedPressed(overlay, tint, factor);
-                  }
-                  return baseColor.withAlpha(kAlphaPressed);
-                }
-                if (states.contains(MaterialState.hovered)) {
-                  if (tintedInteract) {
-                    return tintedHovered(overlay, tint, factor);
-                  }
-                  return colorScheme.onSurface.withAlpha(kAlphaHovered);
-                }
-                if (states.contains(MaterialState.focused)) {
-                  if (tintedInteract) {
-                    return tintedFocused(overlay, tint, factor);
-                  }
-                  return colorScheme.onSurface.withAlpha(kAlphaFocused);
-                }
-                return Colors.transparent;
-              },
-            ),
-          )
+      checkColor: MaterialStateProperty.resolveWith<Color>(
+            (Set<MaterialState> states) {
+          if (useM3) {
+            if (states.contains(MaterialState.disabled)) {
+              if (states.contains(MaterialState.selected)) {
+                return colorScheme.surface;
+              }
+              return Colors.transparent;
+            }
+            if (states.contains(MaterialState.selected)) {
+              if (states.contains(MaterialState.error)) {
+                return colorScheme.onError;
+              }
+              return onBaseColor;
+            }
+            return Colors.transparent;
+          } else {
+            if (states.contains(MaterialState.disabled)) {
+              return isLight
+                  ? Colors.grey.shade200
+                  : Colors.grey.shade900;
+            }
+            if (states.contains(MaterialState.selected)) {
+              return onBaseColor;
+            }
+            return isLight ? Colors.grey.shade50 : Colors.grey.shade400;
+          }
+        },
+      ),
+      fillColor: MaterialStateProperty.resolveWith<Color>(
+            (Set<MaterialState> states) {
+          if (useM3) {
+            if (states.contains(MaterialState.disabled)) {
+              if (tintedDisable) {
+                return tintedDisabled(colorScheme.onSurface, baseColor);
+              }
+              return colorScheme.onSurface.withAlpha(kAlphaDisabled);
+            }
+            if (states.contains(MaterialState.error)) {
+              return colorScheme.error;
+            }
+            if (states.contains(MaterialState.selected)) {
+              return baseColor;
+            }
+            if (states.contains(MaterialState.pressed)) {
+              if (coloredUnselected) return baseColor;
+              return colorScheme.onSurface;
+            }
+            if (states.contains(MaterialState.hovered)) {
+              if (coloredUnselected) return baseColor;
+              return colorScheme.onSurface;
+            }
+            if (states.contains(MaterialState.focused)) {
+              if (coloredUnselected) return baseColor;
+              return colorScheme.onSurface;
+            }
+            if (coloredUnselected) {
+              return baseColor.withAlpha(kAlphaUnselect);
+            }
+            return colorScheme.onSurfaceVariant;
+          } else {
+            if (states.contains(MaterialState.disabled)) {
+              if (tintedDisable) {
+                return tintedDisabled(colorScheme.onSurface, baseColor);
+              }
+              return isLight
+                  ? Colors.grey.shade400
+                  : Colors.grey.shade800;
+            }
+            if (states.contains(MaterialState.selected)) {
+              return baseColor;
+            }
+            // Opinionated color on unselected checkbox.
+            if (coloredUnselected) {
+              return baseColor.withAlpha(kAlphaUnselect);
+            }
+            // This is M2 SDK default.
+            return isLight ? Colors.black54 : Colors.white70;
+          }
+        },
+      ),
+      overlayColor: MaterialStateProperty.resolveWith<Color>(
+            (Set<MaterialState> states) {
+          // Error state only exists in M3 mode.
+          if (states.contains(MaterialState.error) && useM3) {
+            if (states.contains(MaterialState.pressed)) {
+              return colorScheme.error.withAlpha(kAlphaPressed);
+            }
+            if (states.contains(MaterialState.hovered)) {
+              return colorScheme.error.withAlpha(kAlphaHovered);
+            }
+            if (states.contains(MaterialState.focused)) {
+              return colorScheme.error.withAlpha(kAlphaFocused);
+            }
+          }
+          if (states.contains(MaterialState.selected)) {
+            if (states.contains(MaterialState.pressed)) {
+              if (tintedInteract) {
+                return tintedPressed(overlay, tint, factor);
+              }
+              return colorScheme.onSurface.withAlpha(kAlphaPressed);
+            }
+            if (states.contains(MaterialState.hovered)) {
+              if (tintedInteract) {
+                return tintedHovered(overlay, tint, factor);
+              }
+              return baseColor.withAlpha(kAlphaHovered);
+            }
+            if (states.contains(MaterialState.focused)) {
+              if (tintedInteract) {
+                return tintedFocused(overlay, tint, factor);
+              }
+              return baseColor.withAlpha(kAlphaFocused);
+            }
+            return Colors.transparent;
+          }
+          if (states.contains(MaterialState.pressed)) {
+            if (tintedInteract) {
+              return tintedPressed(overlay, tint, factor);
+            }
+            return baseColor.withAlpha(kAlphaPressed);
+          }
+          if (states.contains(MaterialState.hovered)) {
+            if (tintedInteract) {
+              return tintedHovered(overlay, tint, factor);
+            }
+            return colorScheme.onSurface.withAlpha(kAlphaHovered);
+          }
+          if (states.contains(MaterialState.focused)) {
+            if (tintedInteract) {
+              return tintedFocused(overlay, tint, factor);
+            }
+            return colorScheme.onSurface.withAlpha(kAlphaFocused);
+          }
+          return Colors.transparent;
+        },
+      ),
+    )
         : null,
   );
 }
@@ -460,7 +497,7 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'Checkbox regression by '
-            'PR https://github.com/flutter/flutter/pull/125643.',
+                'PR https://github.com/flutter/flutter/pull/125643.',
           ),
         ),
         const Divider(),
@@ -478,9 +515,9 @@ class _HomePageState extends State<HomePage> {
               : false,
           onChanged: widget.settings.customCheck
               ? (bool value) {
-                  widget.onSettings(
-                      widget.settings.copyWith(tintedInteraction: value));
-                }
+            widget.onSettings(
+                widget.settings.copyWith(tintedInteraction: value));
+          }
               : null,
         ),
         SwitchListTile(
@@ -490,9 +527,9 @@ class _HomePageState extends State<HomePage> {
               : false,
           onChanged: widget.settings.customCheck
               ? (bool value) {
-                  widget.onSettings(
-                      widget.settings.copyWith(tintedDisable: value));
-                }
+            widget.onSettings(
+                widget.settings.copyWith(tintedDisable: value));
+          }
               : null,
         ),
         SwitchListTile(
@@ -502,9 +539,9 @@ class _HomePageState extends State<HomePage> {
               : false,
           onChanged: widget.settings.customCheck
               ? (bool value) {
-                  widget.onSettings(
-                      widget.settings.copyWith(coloredUnselected: value));
-                }
+            widget.onSettings(
+                widget.settings.copyWith(coloredUnselected: value));
+          }
               : null,
         ),
         Wrap(
@@ -625,12 +662,12 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        customCheck.hashCode,
-        tintedInteraction.hashCode,
-        tintedDisable.hashCode,
-        coloredUnselected.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    customCheck.hashCode,
+    tintedInteraction.hashCode,
+    tintedDisable.hashCode,
+    coloredUnselected.hashCode,
+  ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
@@ -914,3 +951,73 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+
+</details>
+
+## Used Flutter version
+
+Channel master, 3.12.0-15.0.pre.74
+
+<details>
+  <summary>Flutter doctor</summary>
+
+```
+
+flutter doctor -v
+flutter doctor -v
+[!] Flutter (Channel master, 3.12.0-15.0.pre.74, on macOS 13.4.1 22F82 darwin-arm64, locale en-US)
+    • Flutter version 3.12.0-15.0.pre.74 on channel master at /Users/rydmike/fvm/versions/master
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision cb91ba11a9 (54 minutes ago), 2023-07-10 16:08:08 -0400
+    • Engine revision 71c5674a44
+    • Dart version 3.1.0 (build 3.1.0-291.0.dev)
+    • DevTools version 2.25.0
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly to perform
+      update checks and upgrades.
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 33.0.0)
+    • Android SDK at /Users/rydmike/Library/Android/sdk
+    • Platform android-33, build-tools 33.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+    • Java version OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 14.3.1)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 14E300c
+    • CocoaPods version 1.11.3
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Android Studio (version 2022.2)
+    • Android Studio at /Applications/Android Studio.app/Contents
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)
+
+[✓] IntelliJ IDEA Community Edition (version 2023.1.3)
+    • IntelliJ at /Applications/IntelliJ IDEA CE.app
+    • Flutter plugin version 74.0.4
+    • Dart plugin version 231.9161.14
+
+[✓] VS Code (version 1.79.2)
+    • VS Code at /Applications/Visual Studio Code.app/Contents
+    • Flutter extension version 3.62.0
+
+[✓] Connected device (2 available)
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 13.4.1 22F82 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 114.0.5735.198
+
+[✓] Network resources
+    • All expected network resources are available.
+
+
+
+```
+
+</details>
