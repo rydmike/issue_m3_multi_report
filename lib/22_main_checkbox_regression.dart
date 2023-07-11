@@ -26,7 +26,7 @@ import 'package:flutter/material.dart';
 
 // ***************************************************************************
 // THESE styling constants and functions below are not important for the issue
-// I just usd them as a real example of the syles created by this use case
+// I just usd them as a real example of the styles created by this use case.
 
 /// The amount of alpha based opacity used on tinted disabled effect.
 ///
