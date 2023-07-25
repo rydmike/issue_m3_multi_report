@@ -25,33 +25,13 @@ import 'package:flutter/material.dart';
 // This issue reported here: https://github.com/flutter/flutter/issues/131282
 
 // A seed color for the M3 ColorScheme.
-const Color seedColor = Color(0xFF2E747D); // Color(0xFF6750A4);
+const Color seedColor = Color(0xFF2E747D);
 
-// Input decoration to demonstrate hover/focus issue clearly.
-const InputDecorationTheme inputDecoration = InputDecorationTheme(
-  filled: true,
-  border: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(26.0)),
-  ),
-  errorBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(26.0)),
-  ),
-  focusedBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(26.0)),
-  ),
-  focusedErrorBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(26.0)),
-  ),
-  disabledBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(26.0)),
-  ),
-  enabledBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(26.0)),
-  ),
+// ChipTheme to demonstrate issue
+const chipTheme = ChipThemeData(
+  // color: MaterialStatePropertyAll<Color>(Color(0xAD427EAF)),
+  backgroundColor: Color(0xADAF4299),
 );
-
-// For a nicer dropdown button style use this old ButtonThemeData property.
-const ButtonThemeData buttonTheme = ButtonThemeData(alignedDropdown: true);
 
 // Example theme
 ThemeData theme(Brightness brightness, ThemeSettings settings) {
@@ -64,8 +44,7 @@ ThemeData theme(Brightness brightness, ThemeSettings settings) {
     colorScheme: colorScheme,
     useMaterial3: settings.useMaterial3,
     visualDensity: VisualDensity.standard,
-    inputDecorationTheme: settings.customTheme ? inputDecoration : null,
-    buttonTheme: settings.customTheme ? buttonTheme : null,
+    chipTheme: settings.customTheme ? chipTheme : null,
   );
 }
 
@@ -177,35 +156,9 @@ class _HomePageState extends State<HomePage> {
             widget.onSettings(widget.settings.copyWith(customTheme: value));
           },
         ),
-        SizedBox(
-          width: 200,
-          // constraints: BoxConstraints.tightFor(width: 200),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: DropdownButtonFormField<String>(
-              value: selectedItem,
-              onChanged: (String? value) {
-                setState(() {
-                  selectedItem = value ?? '1 DropdownButtonFormField';
-                });
-              },
-              items: <String>[
-                '1 DropdownButtonFormField',
-                '2 DropdownButtonFormField',
-                '3 DropdownButtonFormField',
-                '4 DropdownButtonFormField',
-                '5 DropdownButtonFormField',
-                '6 DropdownButtonFormField',
-                '7 DropdownButtonFormField',
-                '8 DropdownButtonFormField',
-              ].map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-          ),
+        const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: ChipShowcase(),
         ),
         const Divider(),
         const Padding(
@@ -264,6 +217,109 @@ class ThemeSettings with Diagnosticable {
         useMaterial3.hashCode,
         customTheme.hashCode,
       ]);
+}
+
+class ChipShowcase extends StatelessWidget {
+  const ChipShowcase({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: <Widget>[
+        Chip(
+          label: const Text('Chip'),
+          onDeleted: () {},
+        ),
+        const Chip(
+          label: Text('Chip'),
+          avatar: FlutterLogo(),
+        ),
+        ActionChip(
+          label: const Text('ActionChip'),
+          avatar: const Icon(Icons.settings),
+          onPressed: () {},
+        ),
+        ActionChip(
+          label: const Text('ActionChip using WidgetColor'),
+          avatar: const Icon(Icons.settings),
+          backgroundColor: Colors.purple[100],
+          onPressed: () {},
+        ),
+        const ActionChip(
+          label: Text('ActionChip'),
+          avatar: Icon(Icons.settings),
+          onPressed: null,
+        ),
+        FilterChip(
+          label: const Text('FilterChip'),
+          selected: true,
+          onSelected: (bool value) {},
+        ),
+        const FilterChip(
+          label: Text('FilterChip'),
+          selected: true,
+          onSelected: null,
+        ),
+        FilterChip(
+          label: const Text('FilterChip'),
+          selected: false,
+          onSelected: (bool value) {},
+        ),
+        const FilterChip(
+          label: Text('FilterChip'),
+          selected: false,
+          onSelected: null,
+        ),
+        ChoiceChip(
+          label: const Text('ChoiceChip'),
+          selected: true,
+          onSelected: (bool value) {},
+        ),
+        const ChoiceChip(
+          label: Text('ChoiceChip'),
+          selected: true,
+        ),
+        ChoiceChip(
+          label: const Text('ChoiceChip'),
+          selected: false,
+          onSelected: (bool value) {},
+        ),
+        const ChoiceChip(
+          label: Text('ChoiceChip'),
+          selected: false,
+          onSelected: null,
+        ),
+        InputChip(
+          selected: true,
+          label: const Text('InputChip'),
+          onSelected: (bool value) {},
+          onDeleted: () {},
+        ),
+        InputChip(
+          selected: true,
+          label: const Text('InputChip'),
+          isEnabled: false,
+          onSelected: (bool value) {},
+          onDeleted: () {},
+        ),
+        InputChip(
+          label: const Text('InputChip'),
+          onSelected: (bool value) {},
+          onDeleted: () {},
+        ),
+        InputChip(
+          label: const Text('InputChip'),
+          isEnabled: false,
+          onSelected: (bool value) {},
+          onDeleted: () {},
+          // onDeleted: () {},
+        ),
+      ],
+    );
+  }
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties

@@ -25,7 +25,7 @@ import 'package:flutter/material.dart';
 // This issue reported here: https://github.com/flutter/flutter/issues/131282
 
 // A seed color for the M3 ColorScheme.
-const Color seedColor = Color(0xFF2E747D); // Color(0xFF6750A4);
+const Color seedColor = Color(0xFF2E747D);
 
 // Input decoration to demonstrate hover/focus issue clearly.
 const InputDecorationTheme inputDecoration = InputDecorationTheme(
@@ -177,34 +177,30 @@ class _HomePageState extends State<HomePage> {
             widget.onSettings(widget.settings.copyWith(customTheme: value));
           },
         ),
-        SizedBox(
-          width: 200,
-          // constraints: BoxConstraints.tightFor(width: 200),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: DropdownButtonFormField<String>(
-              value: selectedItem,
-              onChanged: (String? value) {
-                setState(() {
-                  selectedItem = value ?? '1 DropdownButtonFormField';
-                });
-              },
-              items: <String>[
-                '1 DropdownButtonFormField',
-                '2 DropdownButtonFormField',
-                '3 DropdownButtonFormField',
-                '4 DropdownButtonFormField',
-                '5 DropdownButtonFormField',
-                '6 DropdownButtonFormField',
-                '7 DropdownButtonFormField',
-                '8 DropdownButtonFormField',
-              ].map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: DropdownButtonFormField<String>(
+            value: selectedItem,
+            onChanged: (String? value) {
+              setState(() {
+                selectedItem = value ?? '1 DropdownButtonFormField';
+              });
+            },
+            items: <String>[
+              '1 DropdownButtonFormField',
+              '2 DropdownButtonFormField',
+              '3 DropdownButtonFormField',
+              '4 DropdownButtonFormField',
+              '5 DropdownButtonFormField',
+              '6 DropdownButtonFormField',
+              '7 DropdownButtonFormField',
+              '8 DropdownButtonFormField',
+            ].map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
           ),
         ),
         const Divider(),
