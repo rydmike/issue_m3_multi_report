@@ -27,5 +27,7 @@ The following issues have their reproduction code sample, and also the original 
 - (21) [(Material) AppBar scroll under color change does not animate (Not yet reported)]
 - (22) [(Material) Checkbox theme regression](https://github.com/flutter/flutter/issues/130295)
 - (23) [(Regression) Scrolling away open `Tooltip` in a ListView causes a crash](https://github.com/flutter/flutter/issues/130668)
+- (24) [Chip issue (Noy yet report)]
+- (25) [DropdownButtonFormField input decorator focus/hover is not clipped](https://github.com/flutter/flutter/issues/131282)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.
