@@ -22,7 +22,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// This issue reported here: https://github.com/flutter/flutter/issues/131350
+// This issue reported here:
 
 // A seed color for the M3 ColorScheme.
 const Color seedColor = Color(0xFF2E747D);
