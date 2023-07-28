@@ -30,5 +30,6 @@ The following issues have their reproduction code sample, and also the original 
 - (24) [Chip issue (Noy yet report)]
 - (25) [DropdownButtonFormField input decorator focus/hover is not clipped](https://github.com/flutter/flutter/issues/131282)
 - (26) [DropdownMenu leading icon usage layout issue](https://github.com/flutter/flutter/issues/131350)
+- (27) [Switch proposal: Expose _SwitchConfig configuration](https://github.com/flutter/flutter/issues/131478)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.

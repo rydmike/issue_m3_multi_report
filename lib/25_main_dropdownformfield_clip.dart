@@ -34,12 +34,15 @@ const InputDecorationTheme inputDecoration = InputDecorationTheme(
     borderRadius: BorderRadius.all(Radius.circular(26.0)),
   ),
   errorBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: Colors.red, width: 2),
     borderRadius: BorderRadius.all(Radius.circular(26.0)),
   ),
   focusedBorder: OutlineInputBorder(
+    borderSide: BorderSide(width: 2),
     borderRadius: BorderRadius.all(Radius.circular(26.0)),
   ),
   focusedErrorBorder: OutlineInputBorder(
+    borderSide: BorderSide(color: Colors.red, width: 1),
     borderRadius: BorderRadius.all(Radius.circular(26.0)),
   ),
   disabledBorder: OutlineInputBorder(
@@ -159,6 +162,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String selectedItem = '1 DropdownButtonFormField';
+  bool _errorState1 = false;
 
   @override
   Widget build(BuildContext context) {
@@ -180,10 +184,18 @@ class _HomePageState extends State<HomePage> {
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: DropdownButtonFormField<String>(
+            decoration: InputDecoration(
+              errorText: _errorState1 ? "Option 2 triggers error" : null,
+            ),
             value: selectedItem,
             onChanged: (String? value) {
               setState(() {
                 selectedItem = value ?? '1 DropdownButtonFormField';
+                if (selectedItem == '2 DropdownButtonFormField') {
+                  _errorState1 = true;
+                } else {
+                  _errorState1 = false;
+                }
               });
             },
             items: <String>[

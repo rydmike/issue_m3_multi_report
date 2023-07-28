@@ -1,29 +1,62 @@
-## Issue
+## Switch proposal: Expose `_SwitchConfig` configuration
 
-When 
+The `Switch` has many useful styling configuration options hidden in a private mixin class called `_SwitchConfig`. 
+
+```dart
+    mixin _SwitchConfig {
+    double get trackHeight;
+    double get trackWidth;
+    double get switchWidth;
+    double get switchHeight;
+    double get switchHeightCollapsed;
+    double get activeThumbRadius;
+    double get inactiveThumbRadius;
+    double get pressedThumbRadius;
+    double get thumbRadiusWithIcon;
+    List<BoxShadow>? get thumbShadow;
+    MaterialStateProperty<Color> get iconColor;
+    double? get thumbOffset;
+    Size get transitionalThumbSize;
+    int get toggleDuration;
+}
+```
+
+https://github.com/flutter/flutter/blob/0ff68b8c610d54dd88585d0f97531208988f80b3/packages/flutter/lib/src/material/switch.dart#L1626
 
 
-## Expected results
+The addition of it is a part of what enables the same component to change its look from Material2 to Material3, by using its internal configuration options.
 
-Expect 
-
-| Case A | Case B |
-|--------|--------|
-|        |        |
-
-## Actual results
-
-Actual results 
+These configuration options would be very useful when creating custom `Switch` design using it. For example, currently the `Switch` in Flutter can currently **not even** mimic the "official" custom switch style used in Android system settings by Google's Pixel phones, shown below:
 
 
-| Case A | Case B |
-|--------|--------|
-|        |        |
+
+_Android System Settings Switch Style - Recorded on Pixel7Pro_
+
+In this design, the **Switch** thumb is fixed size, and the height of the switch is more narrow and without a border.
+
+
+While we could remove the borders from the M3 Switch and even fake the `Switch` thumb being fixed sized by adding a transparent icon, we cannot change the size of the thumb radius, or even height of the `Switch` track.
+
+
+
+
+_Fake fixed thumb size is doable, but size changes are not_
 
 ## Proposal
 
+Refactor `_SwitchConfig` class to a public class `SwitchConfig` and add it as a public configuration property `switchConfig` to the `Switch` widget and its `SwitchThemeData`.  
 
-## Issue sample code
+This type of configuration class would be much in-line with current sub-config classes `ButtonStyle` and `MenyStyle`, used in many themes and widgets. Considering those name precedents, maybe a better name would be `SwitchStyle`.
+
+A public `SwitchStyle` (or `SwitchConfig`) would need to use mixin `Diagnosticable`" and implement `debugFillProperties`, `copyWith`, `merge`, `lerp`,  `hashCode` and `operator` ==. 
+
+It should be reasonably straight forward to do this refactoring. 
+
+
+
+## Fixed Switch Size Example Code
+
+The code sample used for the fixed 
 
 <details>
 <summary>Code sample</summary>
