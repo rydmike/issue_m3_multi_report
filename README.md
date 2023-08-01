@@ -31,5 +31,7 @@ The following issues have their reproduction code sample, and also the original 
 - (25) [DropdownButtonFormField input decorator focus/hover is not clipped](https://github.com/flutter/flutter/issues/131282)
 - (26) [DropdownMenu leading icon usage layout issue](https://github.com/flutter/flutter/issues/131350)
 - (27) [Switch proposal: Expose _SwitchConfig configuration](https://github.com/flutter/flutter/issues/131478)
+- (28) [Make InputDecorationTheme usage in components consistent](https://github.com/flutter/flutter/issues/131666)
+- (29) [TextStyles in Menus do not follow Material-3 spec](https://github.com/flutter/flutter/issues/131676)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.
