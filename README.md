@@ -34,5 +34,6 @@ The following issues have their reproduction code sample, and also the original 
 - (28) [Make InputDecorationTheme usage in components consistent](https://github.com/flutter/flutter/issues/131666)
 - (29) [TextStyles in Menus do not follow Material-3 spec](https://github.com/flutter/flutter/issues/131676)
 - (30) [Cannot theme progress indicators, many properties missing](https://github.com/flutter/flutter/issues/131690)
+- (31) [Incorrect documentation for Card's surfaceTintColor ](https://github.com/flutter/flutter/issues/132199)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.

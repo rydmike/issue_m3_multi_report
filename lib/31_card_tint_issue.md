@@ -1,3 +1,91 @@
+## Issue https://github.com/flutter/flutter/issues/132199
+
+### Card and surface elevation tinting
+
+@HansMuller, it depends a bit on how technical we want to get with the documentation of the surface tinting as a function of the elevation.
+
+Technically it as an alpha blend starting at opacity 0 (alpha 0x00 ) for elevation 0 and ending at opacity 0.14 (alpha 0x23) reached at elevation 12 or higher. At higher elevations there is no more of the `surfaceTintColor` alpha blended into to the background color.
+
+The fact that the max opacity used for the alpha blend is 0.14, means that it will not be so visible when used on dark background colors.
+
+In the above `blueAccent` background color example, using `Colors.red` as `surfaceTintColor`, the `blueAccent` background color is correctly shifted towards red, it is just subtle and not very visible on the fairly dark blue color.
+
+Regarding the original sample, I cannot replicate it since the Dartpad code sample does not seem to work. **Dartpad** samples needs to have gist url links to work, this one does not have one.
+
+I modified an old example to demonstrate what I see, and attached it below. You can also try it in DartPad here:
+
+https://dartpad.dev/?id=fefe44d813fca88dd2893da1c3c7b389
+
+The sample starts with the colors used in the above example, but you can vary the elevation to see the red "shift" tint effect.
+
+You can also remove the custom background color and see the red tint better on the lighter surface color. Plus you can remove the tint with transparent tint color, and use or not use the custom shadow from above example. So it allows you to test a few option interactively and compare with a `Card` always at 0 elevation and none elevated `BoxDecoration`, to compare the active background colors.
+
+The `Card` being modified is obviously in the middle:
+
+
+https://github.com/flutter/flutter/assets/39990307/02b5b4b1-75e7-48ed-874a-165551a87101
+
+
+
+
+The **DartPad** example is on **stable** channel, but I also tried on latest **master**, same results.
+
+With this sample I cannot see any functional issues. As far as I can replicate and see, it all works as intended, but perhaps the intent of the `surfaceTint` could be explained with some more detail.
+
+
+----
+
+**EDIT:**
+
+Ah, yes now I see, the docs says:
+
+```dart
+  /// The color used as an overlay on [color] to indicate elevation.
+  ///
+  /// If this is null, no overlay will be applied. Otherwise this color
+  /// will be composited on top of [color] with an opacity related
+  /// to [elevation] and used to paint the background of the card.
+  ///
+  /// The default is null.
+  ///
+  /// See [Material.surfaceTintColor] for more details on how this
+  /// overlay is applied.
+  final Color? surfaceTintColor;
+```
+
+The **doc comment is incorrect**, to get no tint you have to pass `Colors.transparent` (or theme it to that). If it is null and we are using Material3, it defaults to `Theme.of(context).colorScheme.surfaceTint`, which typically it the same as `Theme.of(context).colorScheme.primary`.
+
+----
+
+@TahaTesser, did you not recently add some doc update regarding surface tint, elevation and shadows?
+
+---
+
+@HansMuller, I just noticed when looking at the elevation tint code, that the `_surfaceTintOpacityForElevation` could consider a minor optimization, instead of `if (elevation < _surfaceTintElevationOpacities[0].elevation)` it could use `<=` and exit early also for zero elevation and not start the while loop then either. Minor, but elevation 0 is pretty common, might be worth it.
+
+```dart
+  // Calculates the opacity of the surface tint color from the elevation by
+  // looking it up in the token generated table of opacities, interpolating
+  // between values as needed. If the elevation is outside the range of values
+  // in the table it will clamp to the smallest or largest opacity.
+  static double _surfaceTintOpacityForElevation(double elevation) {
+    if (elevation <= _surfaceTintElevationOpacities[0].elevation) {
+      // Elevation less than the first entry, so just clamp it to the first one.
+      return _surfaceTintElevationOpacities[0].opacity;
+    }
+   ...
+```
+
+Code link: https://github.com/flutter/flutter/blob/7c59dfebb957fd8fe3fc0246ee366c8d1da0c817/packages/flutter/lib/src/material/elevation_overlay.dart#L39
+
+
+## Example Card tint code
+
+<details>
+<summary>Code sample</summary>
+
+
+```dart
 // MIT License
 //
 // Copyright (c) 2023 Mike Rydstrom
@@ -39,7 +127,7 @@ final ColorScheme schemeDark = ColorScheme.fromSeed(
 // Example theme
 ThemeData theme(ThemeMode mode, ThemeSettings settings) {
   final ColorScheme colorScheme =
-      mode == ThemeMode.light ? schemeLight : schemeDark;
+  mode == ThemeMode.light ? schemeLight : schemeDark;
 
   return ThemeData(
     colorScheme: colorScheme,
@@ -142,7 +230,7 @@ class HomePage extends StatelessWidget {
         Padding(
           padding: EdgeInsets.all(16.0),
           child:
-              Text('Example of Card with Elevation, Opacity, Tint and Shadow.'),
+          Text('Example of Card with Elevation, Opacity, Tint and Shadow.'),
         ),
         SizedBox(height: 16),
         CardShowCase(),
@@ -254,19 +342,19 @@ class _CardShowCaseState extends State<CardShowCase> {
           value: hasCustomTint && isTinted,
           onChanged: isTinted
               ? (bool newValue) {
-                  setState(() {
-                    hasCustomTint = newValue;
-                    if (!isTinted) {
-                      tintColor = Colors.transparent;
-                    } else {
-                      if (hasCustomTint) {
-                        tintColor = Colors.red;
-                      } else {
-                        tintColor = null;
-                      }
-                    }
-                  });
+            setState(() {
+              hasCustomTint = newValue;
+              if (!isTinted) {
+                tintColor = Colors.transparent;
+              } else {
+                if (hasCustomTint) {
+                  tintColor = Colors.red;
+                } else {
+                  tintColor = null;
                 }
+              }
+            });
+          }
               : null,
         ),
         SwitchListTile(
@@ -333,7 +421,7 @@ class _CardShowCaseState extends State<CardShowCase> {
                 height: 150,
                 child: Center(
                   child:
-                      Text('Card\nElevation\n${elevation.toStringAsFixed(2)}'),
+                  Text('Card\nElevation\n${elevation.toStringAsFixed(2)}'),
                 ),
               ),
             ),
@@ -402,9 +490,9 @@ class ThemeSettings with Diagnosticable {
   /// Override for hashcode, dart.ui Jenkins based.
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        useMaterial3.hashCode,
-        useCustomTheme.hashCode,
-      ]);
+    useMaterial3.hashCode,
+    useCustomTheme.hashCode,
+  ]);
 }
 
 /// Draw a number of boxes showing the colors of key theme color properties
@@ -688,3 +776,8 @@ class ColorCard extends StatelessWidget {
     );
   }
 }
+
+```
+
+</details>
+
