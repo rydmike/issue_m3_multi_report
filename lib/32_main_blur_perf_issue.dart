@@ -137,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   if (index == 0 && blurAppBar)
                     const SliverToBoxAdapter(
-                      child: SizedBox(height: 105),
+                      child: SizedBox(height: 100),
                     ),
                   SliverList.builder(
                     itemBuilder: (context, index) => Padding(
