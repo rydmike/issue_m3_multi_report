@@ -60,10 +60,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final double topSliverPadding =
+        MediaQuery.paddingOf(context).top + kMinInteractiveDimensionCupertino;
+
+    debugPrint('topSliverPadding = $topSliverPadding');
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
         backgroundColor:
-            CupertinoColors.white.withAlpha(blurBottomNav ? 0x75 : 0xFF),
+            CupertinoColors.white.withAlpha(blurBottomNav ? 0x99 : 0xFF),
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.bars),
@@ -82,7 +86,7 @@ class _HomePageState extends State<HomePage> {
               navigationBar: index == 0
                   ? CupertinoNavigationBar(
                       backgroundColor: CupertinoColors.white
-                          .withAlpha(blurAppBar ? 0x75 : 0xFF),
+                          .withAlpha(blurAppBar ? 0x99 : 0xFF),
                       leading: CupertinoButton(
                         child: blurAppBar
                             ? const Icon(CupertinoIcons.viewfinder_circle_fill)
@@ -136,8 +140,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   if (index == 0 && blurAppBar)
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 105),
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: topSliverPadding),
                     ),
                   SliverList.builder(
                     itemBuilder: (context, index) => Padding(
