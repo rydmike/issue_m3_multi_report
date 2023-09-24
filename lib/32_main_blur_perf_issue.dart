@@ -38,6 +38,7 @@ class IssueDemoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CupertinoApp(
       debugShowCheckedModeBanner: false,
+      showPerformanceOverlay: true,
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: HomePage(),
     );
@@ -60,10 +61,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final double topSliverPadding =
+        MediaQuery.paddingOf(context).top + kMinInteractiveDimensionCupertino;
+
+    debugPrint('topSliverPadding = $topSliverPadding');
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
         backgroundColor:
-            CupertinoColors.white.withAlpha(blurBottomNav ? 0x75 : 0xFF),
+            CupertinoColors.white.withAlpha(blurBottomNav ? 0x99 : 0xFF),
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.bars),
@@ -82,7 +87,7 @@ class _HomePageState extends State<HomePage> {
               navigationBar: index == 0
                   ? CupertinoNavigationBar(
                       backgroundColor: CupertinoColors.white
-                          .withAlpha(blurAppBar ? 0x75 : 0xFF),
+                          .withAlpha(blurAppBar ? 0x99 : 0xFF),
                       leading: CupertinoButton(
                         child: blurAppBar
                             ? const Icon(CupertinoIcons.viewfinder_circle_fill)
@@ -93,7 +98,9 @@ class _HomePageState extends State<HomePage> {
                           });
                         },
                       ),
-                      middle: const Text('Blur Standard NavBar'),
+                      middle: blurAppBar
+                          ? const Text('Blur Standard NavBar')
+                          : const Text('No Blur Standard NavBar'),
                       trailing: CupertinoButton(
                         child: blurBottomNav
                             ? const Icon(CupertinoIcons.circle_grid_hex_fill)
@@ -123,7 +130,9 @@ class _HomePageState extends State<HomePage> {
                           });
                         },
                       ),
-                      largeTitle: const Text('Blur Large NavBar'),
+                      largeTitle: blurAppBar
+                          ? const Text('Blur Large NavBar')
+                          : const Text('No Blur Large NavBar'),
                       trailing: CupertinoButton(
                         child: blurBottomNav
                             ? const Icon(CupertinoIcons.circle_grid_hex_fill)
@@ -136,8 +145,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   if (index == 0 && blurAppBar)
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 100),
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: topSliverPadding),
                     ),
                   SliverList.builder(
                     itemBuilder: (context, index) => Padding(

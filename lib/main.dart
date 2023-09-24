@@ -38,6 +38,7 @@ class IssueDemoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CupertinoApp(
       debugShowCheckedModeBanner: false,
+      showPerformanceOverlay: true,
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: HomePage(),
     );
@@ -97,7 +98,9 @@ class _HomePageState extends State<HomePage> {
                           });
                         },
                       ),
-                      middle: const Text('Blur Standard NavBar'),
+                      middle: blurAppBar
+                          ? const Text('Blur Standard NavBar')
+                          : const Text('No Blur Standard NavBar'),
                       trailing: CupertinoButton(
                         child: blurBottomNav
                             ? const Icon(CupertinoIcons.circle_grid_hex_fill)
@@ -127,7 +130,9 @@ class _HomePageState extends State<HomePage> {
                           });
                         },
                       ),
-                      largeTitle: const Text('Blur Large NavBar'),
+                      largeTitle: blurAppBar
+                          ? const Text('Blur Large NavBar')
+                          : const Text('No Blur Large NavBar'),
                       trailing: CupertinoButton(
                         child: blurBottomNav
                             ? const Icon(CupertinoIcons.circle_grid_hex_fill)
