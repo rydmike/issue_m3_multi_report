@@ -27,7 +27,7 @@ The following issues have their reproduction code sample, and also the original 
 - (21) [(Material) AppBar scroll under color change does not animate (Not yet reported)]
 - (22) [(Material) Checkbox theme regression](https://github.com/flutter/flutter/issues/130295)
 - (23) [(Regression) Scrolling away open `Tooltip` in a ListView causes a crash](https://github.com/flutter/flutter/issues/130668)
-- (24) [Chip issue (Noy yet report)]
+- (24) [Chip issue (Not yet report)]
 - (25) [DropdownButtonFormField input decorator focus/hover is not clipped](https://github.com/flutter/flutter/issues/131282)
 - (26) [DropdownMenu leading icon usage layout issue](https://github.com/flutter/flutter/issues/131350)
 - (27) [Switch proposal: Expose _SwitchConfig configuration](https://github.com/flutter/flutter/issues/131478)
@@ -35,5 +35,7 @@ The following issues have their reproduction code sample, and also the original 
 - (29) [TextStyles in Menus do not follow Material-3 spec](https://github.com/flutter/flutter/issues/131676)
 - (30) [Cannot theme progress indicators, many properties missing](https://github.com/flutter/flutter/issues/131690)
 - (31) [Incorrect documentation for Card's surfaceTintColor ](https://github.com/flutter/flutter/issues/132199)
+- (32) [Blur performance issue with IMPELLER Fixed in 3.16](https://github.com/flutter/flutter/issues/13273)
+- (33) [Shadow moves with PageView on elevated Card with non circular corner IMPELLER fixed in 31.6](https://twitter.com/RydMike/status/1722272349381427631)
 
 I find it easier to edit GitHub issues with markdown editor in an IDE than doing it directly in GitHub, especially for longer issues and discussions.
