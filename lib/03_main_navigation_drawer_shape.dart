@@ -129,11 +129,11 @@ class HomePage extends StatelessWidget {
         const SizedBox(height: 16),
         const Text(
           'ISSUE: NavigationDrawer indicator overlay shape does not change '
-              'when you modify the indicator shape'
-              '\n\n'
-              'EXPECT: NavigationDrawer indicator shape overlay to use '
-              'defined indicator shape with border radius 12, like the '
-              'indicator does, but overlay remains stadium shaped.',
+          'when you modify the indicator shape'
+          '\n\n'
+          'EXPECT: NavigationDrawer indicator shape overlay to use '
+          'defined indicator shape with border radius 12, like the '
+          'indicator does, but overlay remains stadium shaped.',
         ),
         const SizedBox(height: 16),
         const Padding(
@@ -147,9 +147,8 @@ class HomePage extends StatelessWidget {
   }
 }
 
-
 class DrawerDesktopWrapper extends StatelessWidget {
-  const DrawerDesktopWrapper({Key? key}) : super(key: key);
+  const DrawerDesktopWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +171,6 @@ class DrawerDesktopWrapper extends StatelessWidget {
     );
   }
 }
-
 
 class NavigationDrawerShowcase extends StatefulWidget {
   const NavigationDrawerShowcase({

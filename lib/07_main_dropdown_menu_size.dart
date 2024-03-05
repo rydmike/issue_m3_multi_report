@@ -162,24 +162,24 @@ class HomePage extends StatelessWidget {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: <Widget>[
-              const SizedBox(height: 16),
-              const Text('FAIL: DropdownMenu overlay width in ListView'),
-              const DropDownMenuShowcase(),
-              const SizedBox(height: 16),
-              const Text('OK: DropdownMenu overlay width in ListView '
+            children: const <Widget>[
+              SizedBox(height: 16),
+              Text('FAIL: DropdownMenu overlay width in ListView'),
+              DropDownMenuShowcase(),
+              SizedBox(height: 16),
+              Text('OK: DropdownMenu overlay width in ListView '
                   'wrapped with Column'),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [const DropDownMenuShowcase()],
+                children: [DropDownMenuShowcase()],
               ),
-              const SizedBox(height: 16),
-              const Text('OK: Other Menus and their overlays in a ListView'),
-              const MenuBarShowcase(),
-              const SizedBox(height: 16),
-              const MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
-              const SizedBox(height: 16),
-              const ShowColorSchemeColors(),
+              SizedBox(height: 16),
+              Text('OK: Other Menus and their overlays in a ListView'),
+              MenuBarShowcase(),
+              SizedBox(height: 16),
+              MenuAnchorContextMenu(message: 'M3 MenuAnchor is cool!'),
+              SizedBox(height: 16),
+              ShowColorSchemeColors(),
             ],
           ),
         ),
@@ -493,7 +493,7 @@ class _MenuAnchorContextMenuState extends State<MenuAnchorContextMenu> {
       onTapDown: _handleTapDown,
       child: MenuAnchor(
         controller: _menuController,
-        anchorTapClosesMenu: true,
+        consumeOutsideTap: true,
         menuChildren: <Widget>[
           MenuItemButton(
             child: Text(MenuEntry.about.label),

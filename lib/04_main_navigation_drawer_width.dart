@@ -138,7 +138,7 @@ class HomePage extends StatelessWidget {
 }
 
 class DrawerDesktopWrapper extends StatelessWidget {
-  const DrawerDesktopWrapper({Key? key}) : super(key: key);
+  const DrawerDesktopWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {

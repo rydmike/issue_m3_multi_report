@@ -228,8 +228,7 @@ class HomePage extends StatelessWidget {
 }
 
 class DrawerDesktopWrapper extends StatelessWidget {
-  const DrawerDesktopWrapper({Key? key, this.longLabel = false})
-      : super(key: key);
+  const DrawerDesktopWrapper({super.key, this.longLabel = false});
   final bool longLabel;
 
   @override

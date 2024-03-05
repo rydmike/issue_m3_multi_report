@@ -171,7 +171,7 @@ class _CardShowCaseState extends State<CardShowCase> {
 
   @override
   Widget build(BuildContext context) {
-    final Color cardColor = Colors.red;
+    const Color cardColor = Colors.red;
 
     return Column(
       children: <Widget>[

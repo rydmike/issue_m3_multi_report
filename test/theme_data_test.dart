@@ -10,10 +10,10 @@ void main() {
     });
     test('Same ThemeData with AppBar elevation theme is equal', () {
       final ThemeData td1 = ThemeData(
-        appBarTheme: AppBarTheme(elevation: 0),
+        appBarTheme: const AppBarTheme(elevation: 0),
       );
       final ThemeData td2 = ThemeData(
-        appBarTheme: AppBarTheme(elevation: 0),
+        appBarTheme: const AppBarTheme(elevation: 0),
       );
       expect(td1, equals(td2));
     });

@@ -175,14 +175,14 @@ class HomePage extends StatelessWidget {
                 : onTextDirection(TextDirection.ltr);
           },
         ),
-        Card(
+        const Card(
           elevation: 10,
           shadowColor: Colors.transparent,
           child: Padding(
-            padding: const EdgeInsets.all(32.0),
+            padding: EdgeInsets.all(32.0),
             child: Wrap(
               spacing: 32,
-              children: const [
+              children: [
                 DrawerDesktopWrapper(child: NavigationDrawerShowcase()),
                 DrawerDesktopWrapper(child: DrawerShowcase()),
               ],
@@ -197,7 +197,7 @@ class HomePage extends StatelessWidget {
 }
 
 class DrawerDesktopWrapper extends StatelessWidget {
-  const DrawerDesktopWrapper({Key? key, this.child}) : super(key: key);
+  const DrawerDesktopWrapper({super.key, this.child});
   final Widget? child;
 
   @override
