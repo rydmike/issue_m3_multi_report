@@ -76,8 +76,11 @@ class ThemeController with ChangeNotifier {
 }
 
 ThemeData appLightTheme({double appBarElevation = 0}) => ThemeData(
-      appBarTheme:
-          AppBarTheme(elevation: appBarElevation, shadowColor: Colors.black),
+      appBarTheme: AppBarTheme(
+          elevation: appBarElevation,
+          shadowColor: Colors.black,
+          // Adding this will make the tint color change animate too.
+          shape: const RoundedRectangleBorder()),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(elevation: 1),
       ),
