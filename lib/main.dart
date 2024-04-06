@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Issue ref: https://github.com/flutter/flutter/issues/89127
-
 void main() {
   final ThemeController themeController = ThemeController();
   runApp(MyApp(themeController: themeController));
@@ -59,7 +57,11 @@ class BodyContent extends StatelessWidget {
           },
           value: themeController.appBarElevation > 0,
         ),
-        TextButton(onPressed: () {}, child: const Text('Text Button')),
+        TextButton(
+            onPressed: () {
+              themeController.triggerRebuild();
+            },
+            child: const Text('Trigger Rebuild')),
       ],
     );
   }
@@ -68,19 +70,25 @@ class BodyContent extends StatelessWidget {
 class ThemeController with ChangeNotifier {
   ThemeController();
   double _appBarElevation = 0;
+
   get appBarElevation => _appBarElevation;
   void setAppBarElevation(double elevation) {
     _appBarElevation = elevation;
+    notifyListeners();
+  }
+
+  void triggerRebuild() {
     notifyListeners();
   }
 }
 
 ThemeData appLightTheme({double appBarElevation = 0}) => ThemeData(
       appBarTheme: AppBarTheme(
-          elevation: appBarElevation,
-          shadowColor: Colors.black,
-          // Adding this will make the tint color change animate too.
-          shape: const RoundedRectangleBorder()),
+        elevation: appBarElevation,
+        shadowColor: Colors.black,
+        // Adding this will make the elevation tint color change animate too.
+        shape: const RoundedRectangleBorder(),
+      ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(elevation: 1),
       ),
