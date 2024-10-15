@@ -27,6 +27,7 @@ import 'color_scheme_view.dart';
 // A "brand" color for the M3 ColorScheme, you can have different
 // colors for each palette, in this demo we use the same color for all.
 const Color brandColor = Color(0xFF1F36BD);
+const Color aMonochromeColor = Color(0xFF111111);
 
 // You can override tones of any built-in FlexTones tone mapping.
 FlexTones appTones(Brightness brightness) {
@@ -65,7 +66,14 @@ ThemeData appTheme(Brightness brightness, bool useMaterial3) {
     // various shades and tones of only the brand color used.
     primaryKey: brandColor,
     secondaryKey: brandColor,
-    tertiaryKey: brandColor,
+    // Using a monochrome seed color for all tertiaries.
+    tertiaryKey: aMonochromeColor,
+    // Only works if respect monochrome seed is true.
+    // Flutter SDK and MCU (Material Color Utilities) does not
+    // let you do this, but you can with FSS, but it is OFF
+    // by default to keep
+    // backwards compatibility with itself and Flutter+MCU.
+    respectMonochromeSeed: true,
     // Pin the brand color to the primary color in light and to
     // primaryContainer in dark mode, this usually works well if
     // the brand color has brightness that is dark and prefers a
