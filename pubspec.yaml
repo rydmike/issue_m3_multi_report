@@ -39,7 +39,11 @@ dependencies:
 
   collection:
 
+  flex_color_picker:
+
   flex_color_scheme:
+
+  flex_seed_scheme:
 
   # Google fonts, by Google material.io.
   # https://pub.dev/packages/google_fonts
