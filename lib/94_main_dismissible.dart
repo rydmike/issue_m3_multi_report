@@ -66,7 +66,7 @@ class _DismissibleExampleState extends State<DismissibleExample> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 clipBehavior: Clip.antiAlias,
                 shadowColor: Colors.transparent,
                 elevation: 2,

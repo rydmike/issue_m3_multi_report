@@ -64,47 +64,47 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
         ? IconButtonThemeData(
             style: ButtonStyle(
             backgroundColor:
-                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
+                WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
                 return tintedDisable(colorScheme.onSurface, tint)
                     .withAlpha(kAlphaVeryLowDisabled);
               }
-              if (states.contains(MaterialState.selected)) {
+              if (states.contains(WidgetState.selected)) {
                 return colorScheme.tertiaryContainer;
               }
               return Colors.transparent;
             }),
             foregroundColor:
-                MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
+                WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
                 return tintedDisable(colorScheme.onSurface, tint);
               }
-              if (states.contains(MaterialState.selected)) {
+              if (states.contains(WidgetState.selected)) {
                 return colorScheme.onTertiaryContainer;
               }
               return foreground;
             }),
-            overlayColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
-                  if (states.contains(MaterialState.pressed)) {
+            overlayColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
+                  if (states.contains(WidgetState.pressed)) {
                     return tintedPressed(overlay, tint, factor);
                   }
-                  if (states.contains(MaterialState.hovered)) {
+                  if (states.contains(WidgetState.hovered)) {
                     return tintedHovered(overlay, tint, factor);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return tintedFocused(overlay, tint, factor);
                   }
                   return Colors.transparent;
                 }
-                if (states.contains(MaterialState.pressed)) {
+                if (states.contains(WidgetState.pressed)) {
                   return tintedPressed(overlay, tint, factor);
                 }
-                if (states.contains(MaterialState.hovered)) {
+                if (states.contains(WidgetState.hovered)) {
                   return tintedHovered(overlay, tint, factor);
                 }
-                if (states.contains(MaterialState.focused)) {
+                if (states.contains(WidgetState.focused)) {
                   return tintedFocused(overlay, tint, factor);
                 }
                 return Colors.transparent;
@@ -596,16 +596,6 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.errorContainer,
               ),
               ColorCard(
-                label: 'Background',
-                color: colorScheme.background,
-                textColor: colorScheme.onBackground,
-              ),
-              ColorCard(
-                label: 'on\nBackground',
-                color: colorScheme.onBackground,
-                textColor: colorScheme.background,
-              ),
-              ColorCard(
                 label: 'Surface',
                 color: colorScheme.surface,
                 textColor: colorScheme.onSurface,
@@ -616,24 +606,19 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.surface,
               ),
               ColorCard(
-                label: 'Surface\nVariant',
-                color: colorScheme.surfaceVariant,
-                textColor: colorScheme.onSurfaceVariant,
-              ),
-              ColorCard(
                 label: 'onSurface\nVariant',
                 color: colorScheme.onSurfaceVariant,
-                textColor: colorScheme.surfaceVariant,
+                textColor: colorScheme.surfaceContainerHighest,
               ),
               ColorCard(
                 label: 'Outline',
                 color: colorScheme.outline,
-                textColor: colorScheme.background,
+                textColor: colorScheme.surface,
               ),
               ColorCard(
                 label: 'Outline\nVariant',
                 color: colorScheme.outlineVariant,
-                textColor: colorScheme.onBackground,
+                textColor: colorScheme.onSurface,
               ),
               ColorCard(
                 label: 'Shadow',

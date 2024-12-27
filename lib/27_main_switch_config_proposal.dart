@@ -41,8 +41,8 @@ ThemeData theme(Brightness brightness, ThemeSettings settings) {
     visualDensity: VisualDensity.standard,
     switchTheme: settings.customTheme
         ? SwitchThemeData(
-            thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
-              (Set<MaterialState> states) {
+            thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+              (Set<WidgetState> states) {
                 return const Icon(Icons.minimize, color: Colors.transparent);
               },
             ),
@@ -251,9 +251,9 @@ class _SwitchShowcaseState extends State<SwitchShowcase> {
             },
           ),
           Switch(
-            thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+            thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+                (Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return Icon(Icons.check,
                     color:
                         isLight ? colorScheme.primary : colorScheme.onPrimary);
@@ -287,7 +287,7 @@ class _SwitchShowcaseState extends State<SwitchShowcase> {
           if (widget.showCupertinoSwitches) ...<Widget>[
             const Text('iOS:'),
             CupertinoSwitch(
-              activeColor: colorScheme.primary,
+              activeTrackColor: colorScheme.primary,
               value: isOn1,
               onChanged: (bool value) {
                 setState(() {
@@ -296,12 +296,12 @@ class _SwitchShowcaseState extends State<SwitchShowcase> {
               },
             ),
             CupertinoSwitch(
-              activeColor: colorScheme.primary,
+              activeTrackColor: colorScheme.primary,
               value: isOn1,
               onChanged: null,
             ),
             CupertinoSwitch(
-              activeColor: colorScheme.primary,
+              activeTrackColor: colorScheme.primary,
               value: !isOn1,
               onChanged: (bool value) {
                 setState(() {
@@ -310,7 +310,7 @@ class _SwitchShowcaseState extends State<SwitchShowcase> {
               },
             ),
             CupertinoSwitch(
-              activeColor: colorScheme.primary,
+              activeTrackColor: colorScheme.primary,
               value: !isOn1,
               onChanged: null,
             ),
@@ -484,16 +484,6 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.errorContainer,
               ),
               ColorCard(
-                label: 'Background',
-                color: colorScheme.background,
-                textColor: colorScheme.onBackground,
-              ),
-              ColorCard(
-                label: 'on\nBackground',
-                color: colorScheme.onBackground,
-                textColor: colorScheme.background,
-              ),
-              ColorCard(
                 label: 'Surface',
                 color: colorScheme.surface,
                 textColor: colorScheme.onSurface,
@@ -504,24 +494,19 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.surface,
               ),
               ColorCard(
-                label: 'Surface\nVariant',
-                color: colorScheme.surfaceVariant,
-                textColor: colorScheme.onSurfaceVariant,
-              ),
-              ColorCard(
                 label: 'onSurface\nVariant',
                 color: colorScheme.onSurfaceVariant,
-                textColor: colorScheme.surfaceVariant,
+                textColor: colorScheme.surfaceContainerHighest,
               ),
               ColorCard(
                 label: 'Outline',
                 color: colorScheme.outline,
-                textColor: colorScheme.background,
+                textColor: colorScheme.surface,
               ),
               ColorCard(
                 label: 'Outline\nVariant',
                 color: colorScheme.outlineVariant,
-                textColor: colorScheme.onBackground,
+                textColor: colorScheme.onSurface,
               ),
               ColorCard(
                 label: 'Shadow',

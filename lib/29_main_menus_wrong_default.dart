@@ -41,8 +41,8 @@ ThemeData theme(Brightness brightness, ThemeSettings settings) {
     visualDensity: VisualDensity.standard,
     switchTheme: settings.customTheme
         ? SwitchThemeData(
-            thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
-              (Set<MaterialState> states) {
+            thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+              (Set<WidgetState> states) {
                 return const Icon(Icons.minimize, color: Colors.transparent);
               },
             ),
@@ -388,7 +388,7 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
           dropdownMenuEntries: const <DropdownMenuEntry<IconData>>[
             DropdownMenuEntry<IconData>(
               style: ButtonStyle(
-                padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
                     EdgeInsets.symmetric(horizontal: 12)),
               ),
               label: 'Alarm settings',
@@ -397,7 +397,7 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
             ),
             DropdownMenuEntry<IconData>(
               style: ButtonStyle(
-                padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
                     EdgeInsets.symmetric(horizontal: 12)),
               ),
               label: 'Disabled settings',
@@ -407,7 +407,7 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
             ),
             DropdownMenuEntry<IconData>(
               style: ButtonStyle(
-                padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
                     EdgeInsets.symmetric(horizontal: 12)),
               ),
               label: 'Cabin overview',
@@ -416,7 +416,7 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
             ),
             DropdownMenuEntry<IconData>(
                 style: ButtonStyle(
-                  padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                  padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
                       EdgeInsets.symmetric(horizontal: 12)),
                 ),
                 label: 'Surveillance view',
@@ -425,7 +425,7 @@ class _DropDownMenuShowcaseState extends State<DropDownMenuShowcase> {
                 value: Icons.camera_outdoor_rounded),
             DropdownMenuEntry<IconData>(
               style: ButtonStyle(
-                padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
                     EdgeInsets.symmetric(horizontal: 12)),
               ),
               label: 'Water alert - Body Large',
@@ -1013,16 +1013,6 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.errorContainer,
               ),
               ColorCard(
-                label: 'Background',
-                color: colorScheme.background,
-                textColor: colorScheme.onBackground,
-              ),
-              ColorCard(
-                label: 'on\nBackground',
-                color: colorScheme.onBackground,
-                textColor: colorScheme.background,
-              ),
-              ColorCard(
                 label: 'Surface',
                 color: colorScheme.surface,
                 textColor: colorScheme.onSurface,
@@ -1033,24 +1023,19 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.surface,
               ),
               ColorCard(
-                label: 'Surface\nVariant',
-                color: colorScheme.surfaceVariant,
-                textColor: colorScheme.onSurfaceVariant,
-              ),
-              ColorCard(
                 label: 'onSurface\nVariant',
                 color: colorScheme.onSurfaceVariant,
-                textColor: colorScheme.surfaceVariant,
+                textColor: colorScheme.surfaceContainerHighest,
               ),
               ColorCard(
                 label: 'Outline',
                 color: colorScheme.outline,
-                textColor: colorScheme.background,
+                textColor: colorScheme.surface,
               ),
               ColorCard(
                 label: 'Outline\nVariant',
                 color: colorScheme.outlineVariant,
-                textColor: colorScheme.onBackground,
+                textColor: colorScheme.onSurface,
               ),
               ColorCard(
                 label: 'Shadow',

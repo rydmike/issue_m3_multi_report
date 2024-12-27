@@ -51,37 +51,35 @@ ThemeData demoTheme(Brightness mode, bool useMaterial3) {
         // selected, but there we get the unselected mode all times, so
         // it is not noticed, still one call would be enough.
         overlayColor:
-        MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-
-          if (states.contains(MaterialState.selected)) {
+            WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
             // This CUSTOM overlay for selected overlay never gets seen due
             // to this issue. The debug print are inserted to show when
             // the state is being called.
-            if (states.contains(MaterialState.hovered)) {
+            if (states.contains(WidgetState.hovered)) {
               debugPrint('Overlay: MaterialState.selected+hovered called');
               return colorScheme.error.withOpacity(0.24);
             }
-            if (states.contains(MaterialState.focused)) {
+            if (states.contains(WidgetState.focused)) {
               debugPrint('Overlay: MaterialState.selected+focused called');
               return colorScheme.error.withOpacity(0.24);
             }
             // The pressed state is actually seen, but it is mixed with
             // unselected pressed state.
-            if (states.contains(MaterialState.pressed)) {
+            if (states.contains(WidgetState.pressed)) {
               debugPrint('Overlay: MaterialState.selected+pressed called');
               return colorScheme.error.withOpacity(0.48);
             }
-          }
-          else {
-            if (states.contains(MaterialState.hovered)) {
+          } else {
+            if (states.contains(WidgetState.hovered)) {
               debugPrint('Overlay: MaterialState.hovered called');
               return colorScheme.onSurface.withOpacity(0.08);
             }
-            if (states.contains(MaterialState.focused)) {
+            if (states.contains(WidgetState.focused)) {
               debugPrint('Overlay: MaterialState.focused called');
               return colorScheme.onSurface.withOpacity(0.12);
             }
-            if (states.contains(MaterialState.pressed)) {
+            if (states.contains(WidgetState.pressed)) {
               debugPrint('Overlay: MaterialState.pressed called');
               return colorScheme.onSurface.withOpacity(0.12);
             }
@@ -173,9 +171,9 @@ class HomePage extends StatelessWidget {
         const SizedBox(height: 16),
         const Text(
           'ISSUE: SegmentedButton selected overlay incorrect due '
-              'to widget setting wrong MaterialState.'
-              '\n\n'
-              'EXPECT: SegmentedButton selected state overlayColor to work.',
+          'to widget setting wrong MaterialState.'
+          '\n\n'
+          'EXPECT: SegmentedButton selected state overlayColor to work.',
         ),
         const SizedBox(height: 16),
         const Padding(
@@ -468,16 +466,6 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.errorContainer,
               ),
               ColorCard(
-                label: 'Background',
-                color: colorScheme.background,
-                textColor: colorScheme.onBackground,
-              ),
-              ColorCard(
-                label: 'on\nBackground',
-                color: colorScheme.onBackground,
-                textColor: colorScheme.background,
-              ),
-              ColorCard(
                 label: 'Surface',
                 color: colorScheme.surface,
                 textColor: colorScheme.onSurface,
@@ -488,24 +476,19 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.surface,
               ),
               ColorCard(
-                label: 'Surface\nVariant',
-                color: colorScheme.surfaceVariant,
-                textColor: colorScheme.onSurfaceVariant,
-              ),
-              ColorCard(
                 label: 'onSurface\nVariant',
                 color: colorScheme.onSurfaceVariant,
-                textColor: colorScheme.surfaceVariant,
+                textColor: colorScheme.surfaceContainerHighest,
               ),
               ColorCard(
                 label: 'Outline',
                 color: colorScheme.outline,
-                textColor: colorScheme.background,
+                textColor: colorScheme.surface,
               ),
               ColorCard(
                 label: 'Outline\nVariant',
                 color: colorScheme.outlineVariant,
-                textColor: colorScheme.onBackground,
+                textColor: colorScheme.onSurface,
               ),
               ColorCard(
                 label: 'Shadow',

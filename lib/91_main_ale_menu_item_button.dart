@@ -233,7 +233,8 @@ class _MyMenuBarState extends State<MyMenuBar> {
                   // Push navigate to DemoAlePage
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => DemoAlePage()),
+                    MaterialPageRoute(
+                        builder: (context) => const DemoAlePage()),
                   );
                 },
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyA,

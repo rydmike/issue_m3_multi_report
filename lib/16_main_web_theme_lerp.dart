@@ -43,11 +43,8 @@ const ColorScheme schemeLight = ColorScheme(
   onError: Color(0xffffffff),
   errorContainer: Color(0xffffdad6),
   onErrorContainer: Color(0xff410002),
-  background: Color(0xfffffbff),
-  onBackground: Color(0xff201a1b),
   surface: Color(0xfffffbff),
   onSurface: Color(0xff201a1b),
-  surfaceVariant: Color(0xfff3dde0),
   onSurfaceVariant: Color(0xff524345),
   outline: Color(0xff847375),
   // outlineVariant: Color(0xffd6c2c4),
@@ -77,11 +74,8 @@ const ColorScheme schemeDark = ColorScheme(
   onError: Color(0xff690005),
   errorContainer: Color(0xff93000a),
   onErrorContainer: Color(0xffffb4ab),
-  background: Color(0xff2b2123),
-  onBackground: Color(0xffece0e0),
   surface: Color(0xff2b2123),
   onSurface: Color(0xffece0e0),
-  surfaceVariant: Color(0xff5a484b),
   onSurfaceVariant: Color(0xffd6c2c4),
   outline: Color(0xff9f8c8f),
   // outlineVariant: Color(0xff524345),
@@ -210,9 +204,9 @@ class HomePage extends StatelessWidget {
 
     final Color surfaceVariant =
         isLight ? const Color(0xfff3dde0) : const Color(0xfff3dde0);
-    if (scheme.surfaceVariant != surfaceVariant) {
-      debugPrint(
-          'scheme.surfaceVariant: ${scheme.surfaceVariant} != $surfaceVariant');
+    if (scheme.surfaceContainerHighest != surfaceVariant) {
+      debugPrint('scheme.surfaceVariant:'
+          ' ${scheme.surfaceContainerHighest} != $surfaceVariant');
     }
     return ListView(
       children: <Widget>[
@@ -223,7 +217,7 @@ class HomePage extends StatelessWidget {
         const SizedBox(height: 16),
         SwitchListTile(
           title: const Text('Change primary container'),
-          value: settings.useCustomTheme ?? false,
+          value: settings.useCustomTheme,
           onChanged: (bool newValue) {
             onSettings.call(settings.copyWith(useCustomTheme: newValue));
           },
@@ -453,16 +447,6 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.errorContainer,
               ),
               ColorCard(
-                label: 'Background',
-                color: colorScheme.background,
-                textColor: colorScheme.onBackground,
-              ),
-              ColorCard(
-                label: 'on\nBackground',
-                color: colorScheme.onBackground,
-                textColor: colorScheme.background,
-              ),
-              ColorCard(
                 label: 'Surface',
                 color: colorScheme.surface,
                 textColor: colorScheme.onSurface,
@@ -473,35 +457,20 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.surface,
               ),
               ColorCard(
-                label: 'Surface\nVariant',
-                color: colorScheme.surfaceVariant,
-                textColor: colorScheme.onSurfaceVariant,
-              ),
-              ColorCard(
                 label: 'onSurface\nVariant',
                 color: colorScheme.onSurfaceVariant,
-                textColor: colorScheme.surfaceVariant,
+                textColor: colorScheme.surfaceContainerHighest,
               ),
               ColorCard(
                 label: 'Outline',
                 color: colorScheme.outline,
-                textColor: colorScheme.background,
+                textColor: colorScheme.surface,
               ),
-              // ColorCard(
-              //   label: 'Outline\nVariant',
-              //   color: colorScheme.outlineVariant,
-              //   textColor: colorScheme.onBackground,
-              // ),
               ColorCard(
                 label: 'Shadow',
                 color: colorScheme.shadow,
                 textColor: _onColor(colorScheme.shadow, background),
               ),
-              // ColorCard(
-              //   label: 'Scrim',
-              //   color: colorScheme.scrim,
-              //   textColor: _onColor(colorScheme.scrim, background),
-              // ),
               ColorCard(
                 label: 'Inverse\nSurface',
                 color: colorScheme.inverseSurface,

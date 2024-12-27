@@ -214,59 +214,59 @@ ThemeData theme(Brightness brightness, ThemeSettings settings) {
     visualDensity: VisualDensity.standard,
     checkboxTheme: useCustomCheck
         ? CheckboxThemeData(
-            checkColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
+            checkColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
                 if (useM3) {
-                  if (states.contains(MaterialState.disabled)) {
-                    if (states.contains(MaterialState.selected)) {
+                  if (states.contains(WidgetState.disabled)) {
+                    if (states.contains(WidgetState.selected)) {
                       return colorScheme.surface;
                     }
                     return Colors.transparent;
                   }
-                  if (states.contains(MaterialState.selected)) {
-                    if (states.contains(MaterialState.error)) {
+                  if (states.contains(WidgetState.selected)) {
+                    if (states.contains(WidgetState.error)) {
                       return colorScheme.onError;
                     }
                     return onBaseColor;
                   }
                   return Colors.transparent;
                 } else {
-                  if (states.contains(MaterialState.disabled)) {
+                  if (states.contains(WidgetState.disabled)) {
                     return isLight
                         ? Colors.grey.shade200
                         : Colors.grey.shade900;
                   }
-                  if (states.contains(MaterialState.selected)) {
+                  if (states.contains(WidgetState.selected)) {
                     return onBaseColor;
                   }
                   return isLight ? Colors.grey.shade50 : Colors.grey.shade400;
                 }
               },
             ),
-            fillColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
+            fillColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
                 if (useM3) {
-                  if (states.contains(MaterialState.disabled)) {
+                  if (states.contains(WidgetState.disabled)) {
                     if (tintedDisable) {
                       return tintedDisabled(colorScheme.onSurface, baseColor);
                     }
                     return colorScheme.onSurface.withAlpha(kAlphaDisabled);
                   }
-                  if (states.contains(MaterialState.error)) {
+                  if (states.contains(WidgetState.error)) {
                     return colorScheme.error;
                   }
-                  if (states.contains(MaterialState.selected)) {
+                  if (states.contains(WidgetState.selected)) {
                     return baseColor;
                   }
-                  if (states.contains(MaterialState.pressed)) {
+                  if (states.contains(WidgetState.pressed)) {
                     if (coloredUnselected) return baseColor;
                     return colorScheme.onSurface;
                   }
-                  if (states.contains(MaterialState.hovered)) {
+                  if (states.contains(WidgetState.hovered)) {
                     if (coloredUnselected) return baseColor;
                     return colorScheme.onSurface;
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     if (coloredUnselected) return baseColor;
                     return colorScheme.onSurface;
                   }
@@ -275,7 +275,7 @@ ThemeData theme(Brightness brightness, ThemeSettings settings) {
                   }
                   return colorScheme.onSurfaceVariant;
                 } else {
-                  if (states.contains(MaterialState.disabled)) {
+                  if (states.contains(WidgetState.disabled)) {
                     if (tintedDisable) {
                       return tintedDisabled(colorScheme.onSurface, baseColor);
                     }
@@ -283,7 +283,7 @@ ThemeData theme(Brightness brightness, ThemeSettings settings) {
                         ? Colors.grey.shade400
                         : Colors.grey.shade800;
                   }
-                  if (states.contains(MaterialState.selected)) {
+                  if (states.contains(WidgetState.selected)) {
                     return baseColor;
                   }
                   // Opinionated color on unselected checkbox.
@@ -295,34 +295,34 @@ ThemeData theme(Brightness brightness, ThemeSettings settings) {
                 }
               },
             ),
-            overlayColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
+            overlayColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
                 // Error state only exists in M3 mode.
-                if (states.contains(MaterialState.error) && useM3) {
-                  if (states.contains(MaterialState.pressed)) {
+                if (states.contains(WidgetState.error) && useM3) {
+                  if (states.contains(WidgetState.pressed)) {
                     return colorScheme.error.withAlpha(kAlphaPressed);
                   }
-                  if (states.contains(MaterialState.hovered)) {
+                  if (states.contains(WidgetState.hovered)) {
                     return colorScheme.error.withAlpha(kAlphaHovered);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return colorScheme.error.withAlpha(kAlphaFocused);
                   }
                 }
-                if (states.contains(MaterialState.selected)) {
-                  if (states.contains(MaterialState.pressed)) {
+                if (states.contains(WidgetState.selected)) {
+                  if (states.contains(WidgetState.pressed)) {
                     if (tintedInteract) {
                       return tintedPressed(overlay, tint, factor);
                     }
                     return colorScheme.onSurface.withAlpha(kAlphaPressed);
                   }
-                  if (states.contains(MaterialState.hovered)) {
+                  if (states.contains(WidgetState.hovered)) {
                     if (tintedInteract) {
                       return tintedHovered(overlay, tint, factor);
                     }
                     return baseColor.withAlpha(kAlphaHovered);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     if (tintedInteract) {
                       return tintedFocused(overlay, tint, factor);
                     }
@@ -330,19 +330,19 @@ ThemeData theme(Brightness brightness, ThemeSettings settings) {
                   }
                   return Colors.transparent;
                 }
-                if (states.contains(MaterialState.pressed)) {
+                if (states.contains(WidgetState.pressed)) {
                   if (tintedInteract) {
                     return tintedPressed(overlay, tint, factor);
                   }
                   return baseColor.withAlpha(kAlphaPressed);
                 }
-                if (states.contains(MaterialState.hovered)) {
+                if (states.contains(WidgetState.hovered)) {
                   if (tintedInteract) {
                     return tintedHovered(overlay, tint, factor);
                   }
                   return colorScheme.onSurface.withAlpha(kAlphaHovered);
                 }
-                if (states.contains(MaterialState.focused)) {
+                if (states.contains(WidgetState.focused)) {
                   if (tintedInteract) {
                     return tintedFocused(overlay, tint, factor);
                   }
@@ -796,16 +796,6 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.errorContainer,
               ),
               ColorCard(
-                label: 'Background',
-                color: colorScheme.background,
-                textColor: colorScheme.onBackground,
-              ),
-              ColorCard(
-                label: 'on\nBackground',
-                color: colorScheme.onBackground,
-                textColor: colorScheme.background,
-              ),
-              ColorCard(
                 label: 'Surface',
                 color: colorScheme.surface,
                 textColor: colorScheme.onSurface,
@@ -816,24 +806,19 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.surface,
               ),
               ColorCard(
-                label: 'Surface\nVariant',
-                color: colorScheme.surfaceVariant,
-                textColor: colorScheme.onSurfaceVariant,
-              ),
-              ColorCard(
                 label: 'onSurface\nVariant',
                 color: colorScheme.onSurfaceVariant,
-                textColor: colorScheme.surfaceVariant,
+                textColor: colorScheme.surfaceContainerHighest,
               ),
               ColorCard(
                 label: 'Outline',
                 color: colorScheme.outline,
-                textColor: colorScheme.background,
+                textColor: colorScheme.surface,
               ),
               ColorCard(
                 label: 'Outline\nVariant',
                 color: colorScheme.outlineVariant,
-                textColor: colorScheme.onBackground,
+                textColor: colorScheme.onSurface,
               ),
               ColorCard(
                 label: 'Shadow',

@@ -52,7 +52,7 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
     visualDensity: VisualDensity.standard,
     menuTheme: const MenuThemeData(
       style: MenuStyle(
-        padding: MaterialStatePropertyAll<EdgeInsetsGeometry?>(
+        padding: WidgetStatePropertyAll<EdgeInsetsGeometry?>(
           EdgeInsets.all(8),
         ),
       ),
@@ -60,59 +60,58 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
     menuButtonTheme: MenuButtonThemeData(
       style: ButtonStyle(
         backgroundColor:
-            MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.pressed)) {
+            WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.pressed)) {
             return colorScheme.primary;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return colorScheme.primary;
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return colorScheme.primaryContainer;
           }
           return Colors.transparent;
         }),
         foregroundColor:
-            MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+            WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return colorScheme.onSurface.withOpacity(0.38);
           }
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return colorScheme.onPrimary;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return colorScheme.onPrimary;
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return colorScheme.onPrimaryContainer;
           }
           return colorScheme.onSurface;
         }),
-        iconColor:
-            MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+        iconColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return colorScheme.onSurface.withOpacity(0.38);
           }
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return colorScheme.onPrimary;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return colorScheme.onPrimary;
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return colorScheme.onPrimaryContainer;
           }
           return colorScheme.onSurfaceVariant;
         }),
         overlayColor:
-            MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.pressed)) {
+            WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.pressed)) {
             return colorScheme.onPrimary.withOpacity(0.12);
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return colorScheme.onPrimary.withOpacity(0.08);
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return colorScheme.onPrimaryContainer.withOpacity(0.12);
           }
           return Colors.transparent;
@@ -830,16 +829,6 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.errorContainer,
               ),
               ColorCard(
-                label: 'Background',
-                color: colorScheme.background,
-                textColor: colorScheme.onBackground,
-              ),
-              ColorCard(
-                label: 'on\nBackground',
-                color: colorScheme.onBackground,
-                textColor: colorScheme.background,
-              ),
-              ColorCard(
                 label: 'Surface',
                 color: colorScheme.surface,
                 textColor: colorScheme.onSurface,
@@ -850,24 +839,19 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.surface,
               ),
               ColorCard(
-                label: 'Surface\nVariant',
-                color: colorScheme.surfaceVariant,
-                textColor: colorScheme.onSurfaceVariant,
-              ),
-              ColorCard(
                 label: 'onSurface\nVariant',
                 color: colorScheme.onSurfaceVariant,
-                textColor: colorScheme.surfaceVariant,
+                textColor: colorScheme.surfaceContainerHighest,
               ),
               ColorCard(
                 label: 'Outline',
                 color: colorScheme.outline,
-                textColor: colorScheme.background,
+                textColor: colorScheme.surface,
               ),
               ColorCard(
                 label: 'Outline\nVariant',
                 color: colorScheme.outlineVariant,
-                textColor: colorScheme.onBackground,
+                textColor: colorScheme.onSurface,
               ),
               ColorCard(
                 label: 'Shadow',

@@ -198,7 +198,7 @@ class NavigationDrawerDestination extends StatelessWidget {
   /// selected.
   ///
   /// The icon will use [NavigationDrawerThemeData.iconTheme] with
-  /// [MaterialState.selected]. If this is null, the default [IconThemeData]
+  /// [WidgetState.selected]. If this is null, the default [IconThemeData]
   /// would use a size of 24.0 and [ColorScheme.onSurfaceVariant].
   final Widget? selectedIcon;
 
@@ -211,10 +211,8 @@ class NavigationDrawerDestination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Set<MaterialState> selectedState = <MaterialState>{
-      MaterialState.selected
-    };
-    const Set<MaterialState> unselectedState = <MaterialState>{};
+    const Set<WidgetState> selectedState = <WidgetState>{WidgetState.selected};
+    const Set<WidgetState> unselectedState = <WidgetState>{};
 
     final NavigationDrawerThemeData navigationDrawerTheme =
         NavigationDrawerTheme.of(context);
@@ -710,11 +708,11 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   Color? get indicatorColor => _colors.secondaryContainer;
 
   @override
-  MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<IconThemeData?>? get iconTheme {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       return IconThemeData(
         size: 24.0,
-        color: states.contains(MaterialState.selected)
+        color: states.contains(WidgetState.selected)
             ? null
             : _colors.onSurfaceVariant,
       );
@@ -722,11 +720,11 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   }
 
   @override
-  MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<TextStyle?>? get labelTextStyle {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       final TextStyle style = _textTheme.labelLarge!;
       return style.apply(
-        color: states.contains(MaterialState.selected)
+        color: states.contains(WidgetState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
       );

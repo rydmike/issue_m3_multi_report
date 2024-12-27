@@ -53,29 +53,29 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
       tabBarTheme: settings.useCustomTheme
           ? TabBarTheme(
               unselectedLabelColor: colorScheme.error,
-              overlayColor: MaterialStateProperty.resolveWith(
-                  (Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
-                  if (states.contains(MaterialState.hovered)) {
+              overlayColor:
+                  WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
+                  if (states.contains(WidgetState.hovered)) {
                     return overlayBase.withAlpha(kAlphaHovered);
                   }
-                  if (states.contains(MaterialState.focused)) {
+                  if (states.contains(WidgetState.focused)) {
                     return overlayBase.withAlpha(kAlphaFocused);
                   }
-                  if (states.contains(MaterialState.pressed)) {
+                  if (states.contains(WidgetState.pressed)) {
                     return overlayBase.withAlpha(kAlphaPressed);
                   }
                   return null;
                 }
-                if (states.contains(MaterialState.hovered)) {
+                if (states.contains(WidgetState.hovered)) {
                   if (tintInteract) return overlayBase.withAlpha(kAlphaHovered);
                   return colorScheme.onSurface.withAlpha(kAlphaHovered);
                 }
-                if (states.contains(MaterialState.focused)) {
+                if (states.contains(WidgetState.focused)) {
                   if (tintInteract) return overlayBase.withAlpha(kAlphaFocused);
                   return colorScheme.onSurface.withAlpha(kAlphaFocused);
                 }
-                if (states.contains(MaterialState.pressed)) {
+                if (states.contains(WidgetState.pressed)) {
                   if (tintInteract) overlayBase.withAlpha(kAlphaPressed);
                   return overlayBase.withAlpha(kAlphaPressed);
                 }
@@ -489,16 +489,6 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.errorContainer,
               ),
               ColorCard(
-                label: 'Background',
-                color: colorScheme.background,
-                textColor: colorScheme.onBackground,
-              ),
-              ColorCard(
-                label: 'on\nBackground',
-                color: colorScheme.onBackground,
-                textColor: colorScheme.background,
-              ),
-              ColorCard(
                 label: 'Surface',
                 color: colorScheme.surface,
                 textColor: colorScheme.onSurface,
@@ -509,24 +499,19 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.surface,
               ),
               ColorCard(
-                label: 'Surface\nVariant',
-                color: colorScheme.surfaceVariant,
-                textColor: colorScheme.onSurfaceVariant,
-              ),
-              ColorCard(
                 label: 'onSurface\nVariant',
                 color: colorScheme.onSurfaceVariant,
-                textColor: colorScheme.surfaceVariant,
+                textColor: colorScheme.surfaceContainerHighest,
               ),
               ColorCard(
                 label: 'Outline',
                 color: colorScheme.outline,
-                textColor: colorScheme.background,
+                textColor: colorScheme.surface,
               ),
               ColorCard(
                 label: 'Outline\nVariant',
                 color: colorScheme.outlineVariant,
-                textColor: colorScheme.onBackground,
+                textColor: colorScheme.onSurface,
               ),
               ColorCard(
                 label: 'Shadow',

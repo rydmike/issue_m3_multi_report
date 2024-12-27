@@ -19,7 +19,7 @@ class MainApp extends StatelessWidget {
               debugPrint('Selected: $value');
             },
             child: Container(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               height: 400,
               width: 300,
               child: const Center(child: Text('Context menu')),

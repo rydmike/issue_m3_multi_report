@@ -48,11 +48,11 @@ ThemeData demoTheme(Brightness mode, bool useMaterial3) {
       style: ButtonStyle(
         // minimumSize: MaterialStatePropertyAll<Size?>(Size.fromHeight(80.0)),
         backgroundColor:
-        MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+            WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return null;
           }
-          if (states.contains(MaterialState.selected)) {
+          if (states.contains(WidgetState.selected)) {
             return scheme.secondaryContainer;
           }
           // Default theme returns null here and should give us
@@ -143,8 +143,8 @@ class HomePage extends StatelessWidget {
         const SizedBox(height: 16),
         const Text(
           'ISSUE: SegmentedButton cannot be made transparent.'
-              '\n\n'
-              'EXPECT: Transparency to work on SegmentedButton.',
+          '\n\n'
+          'EXPECT: Transparency to work on SegmentedButton.',
         ),
         const SizedBox(height: 16),
         const Card(
@@ -213,11 +213,11 @@ class _SegmentedButtonShowcaseState extends State<SegmentedButtonShowcase> {
         SegmentedButton<Calendar>(
           style: ButtonStyle(
             backgroundColor:
-            MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
+                WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
                 return null;
               }
-              if (states.contains(MaterialState.selected)) {
+              if (states.contains(WidgetState.selected)) {
                 return theme.colorScheme.secondaryContainer;
               }
               // Default theme returns null here and should give us
@@ -457,16 +457,6 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.errorContainer,
               ),
               ColorCard(
-                label: 'Background',
-                color: colorScheme.background,
-                textColor: colorScheme.onBackground,
-              ),
-              ColorCard(
-                label: 'on\nBackground',
-                color: colorScheme.onBackground,
-                textColor: colorScheme.background,
-              ),
-              ColorCard(
                 label: 'Surface',
                 color: colorScheme.surface,
                 textColor: colorScheme.onSurface,
@@ -477,24 +467,19 @@ class ShowColorSchemeColors extends StatelessWidget {
                 textColor: colorScheme.surface,
               ),
               ColorCard(
-                label: 'Surface\nVariant',
-                color: colorScheme.surfaceVariant,
-                textColor: colorScheme.onSurfaceVariant,
-              ),
-              ColorCard(
                 label: 'onSurface\nVariant',
                 color: colorScheme.onSurfaceVariant,
-                textColor: colorScheme.surfaceVariant,
+                textColor: colorScheme.surfaceContainerHighest,
               ),
               ColorCard(
                 label: 'Outline',
                 color: colorScheme.outline,
-                textColor: colorScheme.background,
+                textColor: colorScheme.surface,
               ),
               ColorCard(
                 label: 'Outline\nVariant',
                 color: colorScheme.outlineVariant,
-                textColor: colorScheme.onBackground,
+                textColor: colorScheme.onSurface,
               ),
               ColorCard(
                 label: 'Shadow',
