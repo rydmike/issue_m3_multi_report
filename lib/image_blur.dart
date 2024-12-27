@@ -21,7 +21,7 @@ class _ThemeImageState extends State<ThemeImage> {
   @override
   Widget build(BuildContext context) {
     final double opacity = soldout ? 0.5 : 1.0;
-    TextStyle style = TextStyle(color: Colors.white.withOpacity(opacity));
+    TextStyle style = TextStyle(color: Colors.white.withValues(alpha: opacity));
     return Column(
       children: [
         SwitchListTile(
@@ -68,7 +68,7 @@ class _ThemeImageState extends State<ThemeImage> {
                           height: _shapeRadius * 2,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -69,7 +69,7 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
               foregroundColor:
                   WidgetStateProperty.resolveWith((Set<WidgetState> states) {
                 if (states.contains(WidgetState.disabled)) {
-                  return colorScheme.onSurface.withOpacity(0.38);
+                  return colorScheme.onSurface.withValues(alpha: 0.38);
                 }
                 if (states.contains(WidgetState.pressed)) {
                   return colorScheme.onPrimary;
@@ -85,7 +85,7 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
               iconColor:
                   WidgetStateProperty.resolveWith((Set<WidgetState> states) {
                 if (states.contains(WidgetState.disabled)) {
-                  return colorScheme.onSurface.withOpacity(0.38);
+                  return colorScheme.onSurface.withValues(alpha: 0.38);
                 }
                 if (states.contains(WidgetState.pressed)) {
                   return colorScheme.onPrimary;
@@ -101,13 +101,13 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
               overlayColor: WidgetStateProperty.resolveWith(
                 (Set<WidgetState> states) {
                   if (states.contains(WidgetState.pressed)) {
-                    return colorScheme.onPrimary.withOpacity(0.12);
+                    return colorScheme.onPrimary.withValues(alpha: 0.12);
                   }
                   if (states.contains(WidgetState.hovered)) {
-                    return colorScheme.onPrimary.withOpacity(0.08);
+                    return colorScheme.onPrimary.withValues(alpha: 0.08);
                   }
                   if (states.contains(WidgetState.focused)) {
-                    return colorScheme.onPrimary.withOpacity(0.12);
+                    return colorScheme.onPrimary.withValues(alpha: 0.12);
                   }
                   return Colors.transparent;
                 },

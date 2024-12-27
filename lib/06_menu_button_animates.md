@@ -94,7 +94,7 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
         foregroundColor: MaterialStateProperty.resolveWith(
                 (Set<MaterialState> states) {
               if (states.contains(MaterialState.disabled)) {
-                return colorScheme.onSurface.withOpacity(0.38);
+                return colorScheme.onSurface.withValues(alpha: 0.38);
               }
               if (states.contains(MaterialState.pressed)) {
                 return colorScheme.onPrimary;
@@ -110,7 +110,7 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
         iconColor: MaterialStateProperty.resolveWith(
                 (Set<MaterialState> states) {
               if (states.contains(MaterialState.disabled)) {
-                return colorScheme.onSurface.withOpacity(0.38);
+                return colorScheme.onSurface.withValues(alpha: 0.38);
               }
               if (states.contains(MaterialState.pressed)) {
                 return colorScheme.onPrimary;
@@ -126,13 +126,13 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
         overlayColor: MaterialStateProperty.resolveWith(
               (Set<MaterialState> states) {
             if (states.contains(MaterialState.pressed)) {
-              return colorScheme.onPrimary.withOpacity(0.12);
+              return colorScheme.onPrimary.withValues(alpha: 0.12);
             }
             if (states.contains(MaterialState.hovered)) {
-              return colorScheme.onPrimary.withOpacity(0.08);
+              return colorScheme.onPrimary.withValues(alpha: 0.08);
             }
             if (states.contains(MaterialState.focused)) {
-              return colorScheme.onPrimary.withOpacity(0.12);
+              return colorScheme.onPrimary.withValues(alpha: 0.12);
             }
             return Colors.transparent;
           },

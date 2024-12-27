@@ -60,7 +60,7 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
                 WidgetStateProperty.resolveWith((Set<WidgetState> states) {
               if (states.contains(WidgetState.disabled)) {
                 return const TextStyle()
-                    .apply(color: foreground.withOpacity(0.38));
+                    .apply(color: foreground.withValues(alpha: 0.38));
               }
               return const TextStyle().apply(color: foreground);
             }),

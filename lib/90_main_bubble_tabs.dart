@@ -246,7 +246,7 @@ class BubbleTabItem extends StatelessWidget {
     final WidgetStateProperty<Color> effectiveBackgroundColor =
         WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
-        return backgroundColor.withOpacity(0.4);
+        return backgroundColor.withValues(alpha: 0.4);
       }
       return backgroundColor;
     });

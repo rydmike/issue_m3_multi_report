@@ -58,30 +58,30 @@ ThemeData demoTheme(Brightness mode, bool useMaterial3) {
             // the state is being called.
             if (states.contains(WidgetState.hovered)) {
               debugPrint('Overlay: MaterialState.selected+hovered called');
-              return colorScheme.error.withOpacity(0.24);
+              return colorScheme.error.withValues(alpha: 0.24);
             }
             if (states.contains(WidgetState.focused)) {
               debugPrint('Overlay: MaterialState.selected+focused called');
-              return colorScheme.error.withOpacity(0.24);
+              return colorScheme.error.withValues(alpha: 0.24);
             }
             // The pressed state is actually seen, but it is mixed with
             // unselected pressed state.
             if (states.contains(WidgetState.pressed)) {
               debugPrint('Overlay: MaterialState.selected+pressed called');
-              return colorScheme.error.withOpacity(0.48);
+              return colorScheme.error.withValues(alpha: 0.48);
             }
           } else {
             if (states.contains(WidgetState.hovered)) {
               debugPrint('Overlay: MaterialState.hovered called');
-              return colorScheme.onSurface.withOpacity(0.08);
+              return colorScheme.onSurface.withValues(alpha: 0.08);
             }
             if (states.contains(WidgetState.focused)) {
               debugPrint('Overlay: MaterialState.focused called');
-              return colorScheme.onSurface.withOpacity(0.12);
+              return colorScheme.onSurface.withValues(alpha: 0.12);
             }
             if (states.contains(WidgetState.pressed)) {
               debugPrint('Overlay: MaterialState.pressed called');
-              return colorScheme.onSurface.withOpacity(0.12);
+              return colorScheme.onSurface.withValues(alpha: 0.12);
             }
           }
           // This never gets called. Falling back to MaterialState is thus

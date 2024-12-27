@@ -400,7 +400,7 @@ class _CardShowCaseState extends State<CardShowCase> {
           children: [
             Card(
               elevation: 0,
-              color: cardColor.withOpacity(opacity),
+              color: cardColor.withValues(alpha: opacity),
               surfaceTintColor: tintColor,
               shadowColor: shadowColor,
               child: const SizedBox(
@@ -413,7 +413,7 @@ class _CardShowCaseState extends State<CardShowCase> {
             ),
             Card(
               elevation: elevation,
-              color: cardColor.withOpacity(opacity),
+              color: cardColor.withValues(alpha: opacity),
               surfaceTintColor: tintColor,
               shadowColor: shadowColor,
               child: SizedBox(
@@ -427,7 +427,7 @@ class _CardShowCaseState extends State<CardShowCase> {
             ),
             DecoratedBox(
               decoration: BoxDecoration(
-                color: cardColor.withOpacity(opacity),
+                color: cardColor.withValues(alpha: opacity),
               ),
               child: const SizedBox(
                 width: 150,

@@ -256,9 +256,9 @@ class _NavigationDestinationBuilder extends StatelessWidget {
                   color: selected ? info.indicatorColor ?? navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor! : Colors.transparent,
                   child: InkWell(
                     highlightColor: Colors.transparent,
-                    hoverColor: selected ? colorScheme.onSecondaryContainer.withOpacity(0.08) : colorScheme.onSurface.withOpacity(0.08),
-                    focusColor: selected ? colorScheme.onSecondaryContainer.withOpacity(0.12) : colorScheme.onSurface.withOpacity(0.12),
-                    splashColor: selected ? colorScheme.onSecondaryContainer.withOpacity(0.12) : colorScheme.onSurface.withOpacity(0.12),
+                    hoverColor: selected ? colorScheme.onSecondaryContainer.withValues(alpha: 0.08) : colorScheme.onSurface.withValues(alpha: 0.08),
+                    focusColor: selected ? colorScheme.onSecondaryContainer.withValues(alpha: 0.12) : colorScheme.onSurface.withValues(alpha: 0.12),
+                    splashColor: selected ? colorScheme.onSecondaryContainer.withValues(alpha: 0.12) : colorScheme.onSurface.withValues(alpha: 0.12),
                     onTap: info.onTap,
                     customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
                     child: Row(

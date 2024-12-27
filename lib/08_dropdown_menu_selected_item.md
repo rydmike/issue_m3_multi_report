@@ -40,7 +40,7 @@ Consider these on purpose wild looking `MenuThemeData` and `MenuButtonThemeData`
       foregroundColor: MaterialStateProperty.resolveWith(
           (Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
-          return colorScheme.onSurface.withOpacity(0.38);
+          return colorScheme.onSurface.withValues(alpha: 0.38);
         }
         if (states.contains(MaterialState.pressed)) {
           return colorScheme.onPrimary;
@@ -56,7 +56,7 @@ Consider these on purpose wild looking `MenuThemeData` and `MenuButtonThemeData`
       iconColor: MaterialStateProperty.resolveWith(
           (Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
-          return colorScheme.onSurface.withOpacity(0.38);
+          return colorScheme.onSurface.withValues(alpha: 0.38);
         }
         if (states.contains(MaterialState.pressed)) {
           return colorScheme.onPrimary;
@@ -72,13 +72,13 @@ Consider these on purpose wild looking `MenuThemeData` and `MenuButtonThemeData`
       overlayColor: MaterialStateProperty.resolveWith(
           (Set<MaterialState> states) {
         if (states.contains(MaterialState.pressed)) {
-          return colorScheme.onPrimary.withOpacity(0.12);
+          return colorScheme.onPrimary.withValues(alpha: 0.12);
         }
         if (states.contains(MaterialState.hovered)) {
-          return colorScheme.onPrimary.withOpacity(0.08);
+          return colorScheme.onPrimary.withValues(alpha: 0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return colorScheme.onPrimaryContainer.withOpacity(0.12);
+          return colorScheme.onPrimaryContainer.withValues(alpha: 0.12);
         }
         return Colors.transparent;
       }),
@@ -149,10 +149,10 @@ List<Widget> _buildButtons(
   for (int i = 0; i < filteredEntries.length; i++) {
     final DropdownMenuEntry<T> entry = filteredEntries[i];
     ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
-    final Color focusedBackgroundColor = effectiveStyle.backgroundColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withOpacity(0.12);
+    final Color focusedBackgroundColor = effectiveStyle.backgroundColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withValues(alpha: 0.12);
     final Color focusedForegroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface;
     final Color focusedIconColor = effectiveStyle.iconColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurfaceVariant;
-    final Color focusedOverlayColor = effectiveStyle.overlayColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withOpacity(0.12);
+    final Color focusedOverlayColor = effectiveStyle.overlayColor?.resolve(<MaterialState>{MaterialState.focused}) ?? theme.colorScheme.onSurface.withValues(alpha: 0.12);
 
     // Simulate the focused state because the text field should always be focused
     // during traversal. Include potential MenuItemButton theme in the focus
@@ -270,7 +270,7 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
               foregroundColor: MaterialStateProperty.resolveWith(
                   (Set<MaterialState> states) {
                 if (states.contains(MaterialState.disabled)) {
-                  return colorScheme.onSurface.withOpacity(0.38);
+                  return colorScheme.onSurface.withValues(alpha: 0.38);
                 }
                 if (states.contains(MaterialState.pressed)) {
                   return colorScheme.onPrimary;
@@ -286,7 +286,7 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
               iconColor: MaterialStateProperty.resolveWith(
                   (Set<MaterialState> states) {
                 if (states.contains(MaterialState.disabled)) {
-                  return colorScheme.onSurface.withOpacity(0.38);
+                  return colorScheme.onSurface.withValues(alpha: 0.38);
                 }
                 if (states.contains(MaterialState.pressed)) {
                   return colorScheme.onPrimary;
@@ -302,13 +302,13 @@ ThemeData theme(ThemeMode mode, ThemeSettings settings) {
               overlayColor: MaterialStateProperty.resolveWith(
                   (Set<MaterialState> states) {
                 if (states.contains(MaterialState.pressed)) {
-                  return colorScheme.onPrimary.withOpacity(0.12);
+                  return colorScheme.onPrimary.withValues(alpha: 0.12);
                 }
                 if (states.contains(MaterialState.hovered)) {
-                  return colorScheme.onPrimary.withOpacity(0.08);
+                  return colorScheme.onPrimary.withValues(alpha: 0.08);
                 }
                 if (states.contains(MaterialState.focused)) {
-                  return colorScheme.onPrimaryContainer.withOpacity(0.12);
+                  return colorScheme.onPrimaryContainer.withValues(alpha: 0.12);
                 }
                 return Colors.transparent;
               }),

@@ -138,7 +138,7 @@ class ContextCopyPasteMenu extends StatelessWidget {
   /// passed value is null, or any property in it is null, then it uses
   /// property values from `Theme.of(context).popupMenuTheme`, if they are not
   /// null. For any null value, the following fallback defaults are used:
-  ///   color: theme.cardColor.withOpacity(0.9)
+  ///   color: theme.cardColor.withValues(alpha: 0.9)
   ///   shape: RoundedRectangleBorder(
   ///            borderRadius: BorderRadius.circular(8),
   ///            side: BorderSide(
@@ -167,7 +167,7 @@ class ContextCopyPasteMenu extends StatelessWidget {
     final PopupMenuThemeData effectiveMenuTheme = theme.popupMenuTheme.copyWith(
       color: menuThemeData?.color ??
           theme.popupMenuTheme.color ??
-          theme.colorScheme.surface.withOpacity(0.9),
+          theme.colorScheme.surface.withValues(alpha: 0.9),
       shape: menuThemeData?.shape ??
           theme.popupMenuTheme.shape ??
           RoundedRectangleBorder(
