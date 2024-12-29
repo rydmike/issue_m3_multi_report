@@ -1,3 +1,5 @@
+// Posted as issue: https://github.com/flutter/flutter/issues/160963
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -12,9 +14,9 @@ class IssueApp extends StatelessWidget {
         theme: ThemeData(
           bottomSheetTheme: const BottomSheetThemeData(
             // Works OK
-            clipBehavior: Clip.none,
-            // Does not work
-            // clipBehavior: Clip.antiAlias,
+            // clipBehavior: Clip.none,
+            // Does not work, anything else than Clip.none will cause the issue.
+            clipBehavior: Clip.antiAlias,
           ),
         ),
         darkTheme: ThemeData.dark(),
