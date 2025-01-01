@@ -13,15 +13,12 @@ class IssueApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        theme: AppTheme.light,
-        // theme: ThemeData(
-        //   bottomSheetTheme: const BottomSheetThemeData(
-        //     // Works OK
-        //     // clipBehavior: Clip.none,
-        //     // Does not work, anything else than Clip.none will cause the issue.
-        //     clipBehavior: Clip.antiAlias,
-        //   ),
-        // ),
+        // theme: AppTheme.light,
+        theme: ThemeData(
+          bottomSheetTheme: const BottomSheetThemeData(
+            clipBehavior: Clip.none,
+          ),
+        ),
         darkTheme: ThemeData.dark(),
         themeMode: ThemeMode.light,
         home: const Home(),
@@ -35,21 +32,13 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         body: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                'Hello, STACKED!',
+            children: List.generate(
+              15,
+              (int index) => Text(
+                'This should be blurred',
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-              Text(
-                'Hello, STACKED!',
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              Text(
-                'Hello, STACKED!',
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-            ],
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton(
@@ -78,9 +67,15 @@ class Home extends StatelessWidget {
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: SafeArea(
                       child: Container(
-                        decoration: BoxDecoration(
-                          color: ColorScheme.of(context).onSurface,
-                          borderRadius: const BorderRadius.only(
+                        decoration: const BoxDecoration(
+                          // Use transparent color to see
+                          // blur is for entire page and clip will clip it to
+                          // the shape of the sheet.
+                          color: Colors.transparent,
+                          // Original decoration color, we cannot see that it
+                          // is blurred, but it is.
+                          // ColorScheme.of(context).onSurface,
+                          borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(20),
                             topRight: Radius.circular(20),
                           ),
